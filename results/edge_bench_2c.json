@@ -1,0 +1,21 @@
+{
+  "cpus": [
+    0,
+    2
+  ],
+  "torch_threads": 2,
+  "gemma_int8": {
+    "gen_s_median": 0.559,
+    "tok_s": 28.6,
+    "gen_tokens": 16
+  },
+  "yolo_cpu_ms": 44.0,
+  "e2e_s_per_frame": 0.6,
+  "memory_gb": {
+    "rss_base": 0.56,
+    "rss_after_gemma": 2.79,
+    "rss_after_both": 2.75,
+    "peak_rss": 2.76,
+    "peak_private": 3.59
+  }
+}

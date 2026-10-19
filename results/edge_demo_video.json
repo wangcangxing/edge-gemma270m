@@ -1,0 +1,87 @@
+{
+  "source": "<ASSETS>\\eval\\fall-fall-detection\\sample_1.mp4",
+  "lang": "zh",
+  "yolo": "<REPO>\\yolov10n.pt",
+  "gemma": "<ASSETS>\\models\\gemma-3-270m-it",
+  "gemma_device": "cuda:0",
+  "gemma_load_s": 5.1,
+  "gemma_mem_after_load_gb": 0.54,
+  "records": [
+    {
+      "frame": 0,
+      "yolo_ms": 51.42,
+      "scene": {
+        "画面": "1080x1920，正常",
+        "人物": [],
+        "物体": [
+          "汽车x3"
+        ]
+      },
+      "description": "室内没有人，汽车清晰可见。",
+      "raw": "室内没有人，汽车清晰可见。",
+      "prompt_tokens": 100,
+      "gen_tokens": 8,
+      "gen_s": 0.668,
+      "tok_s": 11.98,
+      "peak_gpu_gb": 0.55,
+      "device": "cuda:0",
+      "int8": false,
+      "lang": "zh",
+      "e2e_s": 0.731
+    },
+    {
+      "frame": 60,
+      "yolo_ms": 27.53,
+      "scene": {
+        "画面": "1080x1920，正常",
+        "人物": [
+          {
+            "位置": "左下",
+            "身高占比": 0.17,
+            "脚部接近地面": false,
+            "旁边物体": [
+              "汽车(旁边)"
+            ]
+          }
+        ],
+        "物体": [
+          "汽车x3"
+        ]
+      },
+      "description": "画面里有人站在画面左下方，附近有汽车。",
+      "raw": "画面里有人站在画面左下方，附近有汽车。",
+      "prompt_tokens": 128,
+      "gen_tokens": 13,
+      "gen_s": 0.826,
+      "tok_s": 15.74,
+      "peak_gpu_gb": 0.55,
+      "device": "cuda:0",
+      "int8": false,
+      "lang": "zh",
+      "e2e_s": 0.854
+    },
+    {
+      "frame": 120,
+      "yolo_ms": 20.41,
+      "scene": {
+        "画面": "1080x1920，正常",
+        "人物": [],
+        "物体": [
+          "汽车x3",
+          "狗"
+        ]
+      },
+      "description": "画面里无人，汽车和狗在原地。",
+      "raw": "画面里无人，汽车和狗在原地。",
+      "prompt_tokens": 102,
+      "gen_tokens": 11,
+      "gen_s": 0.728,
+      "tok_s": 15.11,
+      "peak_gpu_gb": 0.55,
+      "device": "cuda:0",
+      "int8": false,
+      "lang": "zh",
+      "e2e_s": 0.75
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "base_weights_gb": 0.499,
+  "adapter_mb": 29.0,
+  "rows": [
+    {
+      "tag": "gpu_bf16",
+      "device": "cuda:0",
+      "int8": false,
+      "load_s": 6.09,
+      "gen_s_median": 0.55,
+      "tok_s": 27.3,
+      "model_mem_gb": 0.5,
+      "sample": "画面左侧有人躺卧，沙发和茶几就在旁边。"
+    },
+    {
+      "tag": "cpu_fp32",
+      "device": "cpu",
+      "int8": false,
+      "load_s": 2.42,
+      "gen_s_median": 1.008,
+      "tok_s": 14.9,
+      "model_mem_gb": 1.0,
+      "sample": "画面左侧有人躺卧，沙发和茶几就在旁边。"
+    },
+    {
+      "tag": "cpu_int8",
+      "device": "cpu",
+      "int8": true,
+      "load_s": 2.34,
+      "gen_s_median": 0.658,
+      "tok_s": 24.3,
+      "model_mem_gb": 0.63,
+      "sample": "画面左侧有一人躺卧，旁边是沙发和茶几。"
+    }
+  ]
+}

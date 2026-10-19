@@ -1,0 +1,46 @@
+{
+  "source": "<ASSETS>\\dataset\\domain_yolo_v2\\images\\val\\fall_detection_5_t0005_250.jpg",
+  "lang": "zh",
+  "yolo": "<REPO>\\yolov10n.pt",
+  "gemma": "<ASSETS>\\models\\gemma-3-270m-it",
+  "gemma_device": "cpu",
+  "gemma_load_s": 5.19,
+  "gemma_mem_after_load_gb": 0.0,
+  "records": [
+    {
+      "frame": 0,
+      "yolo_ms": 138.02,
+      "scene": {
+        "画面": "1280x720，正常",
+        "人物": [
+          {
+            "位置": "中中",
+            "身高占比": 0.74,
+            "脚部接近地面": false,
+            "旁边物体": [
+              "椅子(附近)",
+              "沙发(远处)",
+              "床(远处)"
+            ]
+          }
+        ],
+        "物体": [
+          "椅子x3",
+          "沙发",
+          "床"
+        ]
+      },
+      "description": "一个人在画面中央，附近有椅子、沙发和床。",
+      "raw": "一个人在画面中央，附近有椅子、沙发和床。",
+      "prompt_tokens": 141,
+      "gen_tokens": 14,
+      "gen_s": 1.069,
+      "tok_s": 13.09,
+      "peak_gpu_gb": 0.0,
+      "device": "cpu",
+      "int8": true,
+      "lang": "zh",
+      "e2e_s": 1.218
+    }
+  ]
+}

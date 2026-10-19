@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+
+# 重资产/本地数据，不入库
+dataset/
+models/
+out/
+weights/
+
+# 报告：仓库只留 Markdown 副本，docx 不入库
+*.docx
+results/train_log.txt
