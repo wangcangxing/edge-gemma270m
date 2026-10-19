@@ -1,4 +1,4 @@
-﻿r"""把 Word 报告转成 Markdown（仓库入库的副本）。
+r"""把 Word 报告转成 Markdown（仓库入库的副本）。
 
     python build_report_md.py
 

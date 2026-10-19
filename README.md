@@ -111,6 +111,10 @@ $env:EDGE_CPUS = '0,2'; & $py bench_2c.py --image <IMAGE>
 （两组测量条件略有差异：14 线程那组是 pipeline 里含模型加载后的稳定值，2 线程这组关掉了姿态模型，
 但 Gemma 的差距与 YOLO 的量级差都在 2~4 倍，方向一致。）
 
+**姿态开启的 20 帧复核**（`bench_thread_sweep_posture.py`）：4t 中位 455/514 ms、6t 472/474 ms，
+两者逐帧胜负两次 13/20 与 3/20 翻转 → **4t/6t 打平，不存在“4t 唯一最优”**；8t 687 ms、14t 1248 ms
+明显更差。完整 pipeline 推荐 **4~6 线程**。
+
 ### 单核单线程（`bench_2c.py --cpus 0 --threads 1`）
 
 | 项目 | 数值 |

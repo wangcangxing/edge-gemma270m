@@ -19,8 +19,8 @@ from typing import Any
 import cv2
 import numpy as np
 
-REPO = Path(__file__).resolve().parents[1]
-DEFAULT_WEIGHTS = REPO / "yolov10n.pt"
+HERE = Path(__file__).resolve().parent
+DEFAULT_WEIGHTS = HERE / "yolov10n.pt"
 
 # COCO 80 类 → 中文。检测器只认这 80 类，语义层不越界描述。
 COCO_ZH = {

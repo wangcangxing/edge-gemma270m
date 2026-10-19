@@ -28,6 +28,7 @@ bench1 = json.loads((RESULTS / "edge_bench_1c1t.json").read_text(encoding="utf-8
 prec = json.loads((RESULTS / "edge_thread_precision.json").read_text(encoding="utf-8"))["summary"]
 q_int8 = json.loads((RESULTS / "edge_int8_1t.json").read_text(encoding="utf-8"))
 q_bf16 = json.loads((RESULTS / "edge_bf16_greedy.json").read_text(encoding="utf-8"))
+sweep_post = json.loads((RESULTS / "edge_thread_sweep_posture_clean.json").read_text(encoding="utf-8"))
 cmp_desc = json.loads((RESULTS / "edge_edge_vs_mage.json").read_text(encoding="utf-8"))
 cmp_fall = json.loads((RESULTS / "edge_edge_vs_mage_fall.json").read_text(encoding="utf-8"))
 folds = json.loads((RESULTS / "edge_posture_folds_fall.json").read_text(encoding="utf-8"))
@@ -203,7 +204,7 @@ bullet(f"质量（test 100 帧，同提示词对照）：人数一致率 {base_s
 bullet("基座 270M 不会按指令把场景 JSON 改写成句子：它照抄字段（分辨率、姿态、身高占比），"
        "或输出“画面：正常”。LoRA 微调是必需项，不是优化项。")
 bullet("270M 这个尺寸上 GPU 没有优势：GPU bf16 0.55 s 与 CPU int8 0.66 s 基本打平；"
-       "2 线程反而快于 14 线程（0.45 s vs 0.66 s）。")
+       "完整 pipeline 下 4~6 线程最优（4t/6t 打平），8 线程以上明显劣化（20 帧实测）。")
 bullet("精度不受线程数影响：1T/2T/14T 的人数一致与物体召回都是 100%，逐字一致 39/40（唯一差异为同义改写）；"
        "int8 与 bf16 逐字一致 77/100，指标同为 100%/100%，差异全为同义句。")
 bullet("与 Mage-VL 同帧对照（207 帧）：跌倒召回 Mage 22.6%，Edge 26.4%（域内训练）/ 18.9%（未见测试视频）；"
@@ -362,6 +363,21 @@ table(["配置", "Gemma int8 单句", "tok/s", "YOLO CPU 每帧"], [
     ["2 线程（绑 0,2）", "0.452 s", "35.4", "41 ms"],
 ], widths=[4.5, 4.0, 2.5, 4.0])
 caption("表 10 线程数对比：小模型上限由同步开销决定，开满反而互相等")
+
+doc.add_heading("4.3.1 姿态开启复核（20 帧）", level=3)
+post_rows = []
+for key in ("4t#0", "6t#1", "2t", "8t", "1t", "14t", "4t#6", "6t#7"):
+    v = sweep_post["configs"][key]
+    t = v["total_ms"]
+    post_rows.append([key.replace("#0", "").replace("#1", "").replace("#6", "（重复）")
+                      .replace("#7", "（重复）"),
+                      f"{t['median']}", f"{t['mean']}", f"{t['std']}", f"{t['p95']}"])
+table(["配置", "median", "mean", "std", "p95"], post_rows,
+      widths=[4.5, 2.8, 2.8, 2.8, 2.8])
+caption("表 11 完整 pipeline（姿态开启、20 帧、全局预热 6 次）：4t 与 6t 打平")
+para("4t 两次中位 455.1 / 513.8 ms，6t 472.5 / 473.6 ms；逐帧胜负 13/20 与 3/20 两次方向翻转。"
+     "8t 以上明显劣化（687 / 1248 ms）。因此完整 pipeline 下推荐 4~6 线程，"
+     "“4t 唯一最优”不成立；1t/2t 更慢，14t 最差。")
 para("注：两组测量条件略有差异（14 线程组来自 pipeline 稳定值，2 线程组关闭了姿态模型），"
      "但 Gemma 与 YOLO 的差距分别为 1.45 倍与 3.4 倍，方向一致。")
 
@@ -374,12 +390,12 @@ table(["输入", "设备", "YOLO", "生成", "输出"], [
     ["室内帧（1280×720）", "GPU", f"{rec_ind['yolo_ms']:.0f} ms", f"{rec_ind['gen_s']:.2f} s", rec_ind["description"]],
     ["同一室内帧", "CPU int8", f"{rec_cpu['yolo_ms']:.0f} ms", f"{rec_cpu['gen_s']:.2f} s", rec_cpu["description"]],
 ], widths=[3.5, 2.0, 2.0, 2.0, 6.2])
-caption("表 11 端到端输出（pipeline.py；GPU 为 bf16，CPU 为 int8）")
+caption("表 12 端到端输出（pipeline.py；GPU 为 bf16，CPU 为 int8）")
 
 vrows = [[str(r["frame"]), f"{r['yolo_ms']:.0f} ms", f"{r['gen_s']:.2f} s", r["description"]]
          for r in video["records"]]
 table(["帧号", "YOLO", "生成", "输出"], vrows, widths=[2.0, 2.2, 2.2, 9.5])
-caption("表 12 视频路径 smoke test（sample_1.mp4，0.5 fps 抽 3 帧）")
+caption("表 13 视频路径 smoke test（sample_1.mp4，0.5 fps 抽 3 帧）")
 para("注：该视频是户外画面（汽车），但模板里写死了“室内”假设，第一帧输出“室内没有人”属于场景假设错误，"
      "说明语义层没有判断室内外的能力。")
 
@@ -395,7 +411,7 @@ table(["指标", "基座 270M", "+ LoRA"], [
     ["字数范围", f"{min(r['len'] for r in base)}~{max(r['len'] for r in base)}",
      f"{min(r['len'] for r in tuned)}~{max(r['len'] for r in tuned)}"],
 ], widths=[4.0, 4.5, 4.5])
-caption("表 13 test 100 帧，同一提示词（无 few-shot）对照")
+caption("表 14 test 100 帧，同一提示词（无 few-shot）对照")
 
 table(["指标", "bf16（GPU）", "int8（CPU，1 线程）"], [
     ["人数一致率", f"{q16s['person_ok']*100:.0f}%", f"{q8s['person_ok']*100:.0f}%"],
@@ -404,7 +420,7 @@ table(["指标", "bf16（GPU）", "int8（CPU，1 线程）"], [
     ["平均字数", f"{q16s['avg_len']}", f"{q8s['avg_len']}"],
     ["逐字一致", "基线", f"{exact_8_16}/{len(rows_int8)}"],
 ], widths=[4.0, 4.5, 4.5])
-caption("表 14 int8 与 bf16 的精度对照（同一 100 帧，贪心解码）")
+caption("表 15 int8 与 bf16 的精度对照（同一 100 帧，贪心解码）")
 para(f"{len(rows_int8)-exact_8_16} 条差异全部是同义改写，例如 int8“画面下方有人站立，椅子就在旁边。”"
      "对应 bf16“画面下方有一人站立，旁边是椅子。”，没有人数、物体或位置的事实性差异。")
 
@@ -422,7 +438,7 @@ for n in (0, 1):
                  f"{sum(r['obj_recall'] for r in t)/len(t)*100:.0f}%"])
 table(["场景", "帧数", "基座人数一致", "基座召回", "LoRA 人数一致", "LoRA 召回"], rows,
       widths=[2.2, 1.8, 3.2, 2.8, 3.4, 2.8])
-caption("表 15 分人数统计：基座在 5 个无人帧上全部失败（0/5）")
+caption("表 16 分人数统计：基座在 5 个无人帧上全部失败（0/5）")
 
 doc.add_heading("5.3 失败模式", level=2)
 para("基座 29/100 帧人数不一致，主要是三种：")
@@ -440,7 +456,7 @@ table(["场景输入", "输出", "来源"], [
     ["1 人站立、中央、椅子/沙发/床", "画面中央有一人，旁边是椅子、沙发和床。", "室内帧 GPU"],
     ["1 人站立、右下、椅子", "画面右下方有人站立，椅子就在旁边。", "test 帧"],
 ], widths=[5.0, 7.5, 3.0])
-caption("表 16 典型输出（句子由模型生成，非模板拼接）")
+caption("表 17 典型输出（句子由模型生成，非模板拼接）")
 
 # ---------------- 6 结论 ----------------
 doc.add_heading("6 结论", level=1)
@@ -449,7 +465,8 @@ for i, text in enumerate([
     "CPU 单句 0.45~0.70 s；两核端到端 0.49~0.60 s/帧，单核 0.76 s/帧。",
     "必须微调：基座不会按指令改写 JSON（人数一致 71%、召回 57%），LoRA 后 100%/100%、幻觉 1%，"
     "训练成本 813 步 / 249 秒。",
-    "端侧不需要 GPU：GPU bf16 与 CPU int8 打平；2 线程优于 14 线程；单核精度不掉"
+    "端侧不需要 GPU：GPU bf16 与 CPU int8 打平；完整 pipeline 下 4~6 线程最优"
+    "（4t 与 6t 在噪声内打平），8 线程以上明显劣化；单核精度不掉"
     "（1T/2T/14T 指标均为 100%）。内存峰值约 2.9 GB RSS，其中 int8 参数仅 0.63 GB。",
     "描述上限等于检测器上限：只有 COCO 80 类 + 3 类姿态，没有颜色/材质/动作；姿态漏检时不提“躺卧”。",
     "泛化未证明：测试按视频留出，但仍是同一家庭同一机位；跨场景/跨机位需要重新采数据验证。",
@@ -495,7 +512,7 @@ for label, m in (
                       f"{m['accuracy']*100:.1f}%"])
 table(["系统", "TP/FN/FP", "召回", "精度", "准确率"], fall_rows,
       widths=[5.6, 3.0, 2.4, 2.4, 2.4])
-caption("表 17 跌倒判定：同一 207 帧、同一标签、同一判定（Mage 0.64 s / 9.32 GB；Edge 0.55 GB）")
+caption("表 18 跌倒判定：同一 207 帧、同一标签、同一判定（Mage 0.64 s / 9.32 GB；Edge 0.55 GB）")
 para("两边都只认“躺地”这一类，精度 100% 表示报出的 yes 全是真 lie；召回都不到 30%。"
      "Mage 重跑 22.6% 与旧记录 28.3% 的差别来自取帧（JPG vs MP4 整数秒），不是随机性（见 8.4）。")
 
@@ -508,7 +525,7 @@ table(["指标", "Mage-VL", "Edge"], [
     ["单帧延迟", f"{cmp_desc['mage']['avg_gen_s']} s", f"{cmp_desc['edge']['avg_gen_s']} s"],
     ["峰值显存", f"{cmp_desc['mage_peak_gb']} GB", f"0.55 GB"],
 ], widths=[4.5, 5.0, 5.0])
-caption("表 18 描述任务：同一 100 帧、同一句中文描述指令（这批恰好 0 个 lie）")
+caption("表 19 描述任务：同一 100 帧、同一句中文描述指令（这批恰好 0 个 lie）")
 para("Mage 的 23 次人数失败主要是只描述教室、没提人；Edge 不会漏人，但没有教室/白板/投影仪这类场景语义。")
 
 doc.add_heading("8.4 确定性检验（5 个翻转帧）", level=2)
@@ -522,7 +539,7 @@ det_rows.append(["5 帧（MP4 整数秒）", "deterministic ×2",
                  "yes, yes, yes, yes, no", "5/5 稳定", "旧记录"])
 table(["帧源", "模式", "5 帧答案", "稳定性", "一致于"], det_rows,
       widths=[4.8, 4.2, 4.6, 2.6, 2.4])
-caption("表 19 确定性重跑：torch.use_deterministic_algorithms(True) + 固定种子")
+caption("表 20 确定性重跑：torch.use_deterministic_algorithms(True) + 固定种子")
 para("同一帧源下 deterministic 与 default 输出逐字一致；换取帧方式（MP4 整数秒 vs JPG）答案整体翻转。"
      "所以 5 帧差异不是随机性，而是帧源不同。")
 
