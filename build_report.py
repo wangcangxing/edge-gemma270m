@@ -34,6 +34,8 @@ cmp_fall = json.loads((RESULTS / "edge_edge_vs_mage_fall.json").read_text(encodi
 folds = json.loads((RESULTS / "edge_posture_folds_fall.json").read_text(encoding="utf-8"))
 det = json.loads((RESULTS / "edge_mage_determinism.json").read_text(encoding="utf-8"))
 rerun = json.loads((RESULTS / "edge_mage_rerun_fall.json").read_text(encoding="utf-8"))
+yesno20 = json.loads((RESULTS / "edge_yesno20.json").read_text(encoding="utf-8"))
+lie19 = json.loads((RESULTS / "edge_lie19_diag.json").read_text(encoding="utf-8"))
 rows_int8, rows_bf16 = q_int8["tuned_rows"], q_bf16["tuned_rows"]
 q8s, q16s = q_int8["summary"]["tuned"], q_bf16["summary"]["tuned"]
 exact_8_16 = sum(a["desc"] == b["desc"] for a, b in zip(rows_int8, rows_bf16))
@@ -561,6 +563,32 @@ for text in [
     "边界：14 行缺 250 ms 帧；foldA 只排除了 hr_1/hr_3；测试域是计算机教室；Mage 0.64 s 是 yes/no 而非长描述。",
 ]:
     bullet(text)
+
+doc.add_heading("8.6 姿态规则的两个子集（20% 与 0/19）", level=2)
+yn_lie = [r for r in yesno20["rows"] if r["gt"] == "Lie"]
+yn_tp = [r for r in yn_lie if r["posture"] == "躺卧"]
+img19 = {x["image"] for x in lie19["rows"]}
+
+
+def tkey(video: str, t: int) -> str:
+    return f'{video.replace(".mp4", "")}_t{t:04d}'
+
+
+overlap = [r for r in yn_lie if any(img.startswith(tkey(r["video"], r["t"]))
+                                    for img in img19)]
+table(["子集", "lie 帧", "姿态规则命中", "召回", "命中帧"], [
+    ["20 帧 yes/no 子集", len(yn_lie), len(yn_tp),
+     f"{len(yn_tp)/len(yn_lie)*100:.0f}%",
+     "、".join(f'{r["video"].replace(".mp4","")} t{r["t"]}' for r in yn_tp)],
+    ["test hr_3 的 19 个 lie 帧", len(img19), 0, "0%", "—"],
+    ["两者交集", len(overlap), 0, "0%",
+     "、".join(f'hr_3 t{r["t"]}' for r in overlap)],
+], widths=[4.6, 1.8, 2.8, 1.8, 5.0])
+caption("表 21 姿态规则命中的子集拆解：20% 与 0/19 不是同一批帧")
+para("20 帧 yes/no 子集的 10 个 lie 来自 hr_2（3）、hr_3（4）、fall_detection_10（3）；"
+     "2 个命中分别来自 hr_2 t165 与 fall_detection_10 t66，都不在 19 帧里。"
+     "19 帧全部来自 hr_3；交集 4 帧（hr_3 t149/152/158/176）全部漏检。"
+     "因此 20% 与 0/19 是两个不同子集的估计，不矛盾、也不能互相校验；引用时必须带子集与分母。")
 
 # ---------------- 附录 ----------------
 doc.add_heading("附录 A 复现命令", level=1)
