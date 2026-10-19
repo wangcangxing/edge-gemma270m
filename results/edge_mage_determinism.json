@@ -1,0 +1,92 @@
+{
+  "runs": 3,
+  "deterministic_all_stable": true,
+  "default_all_stable": true,
+  "rows": [
+    {
+      "video": "hr_fall_detection_3.mp4",
+      "t": 152,
+      "gt": "Lie",
+      "old": true,
+      "new": false,
+      "deterministic": [
+        "no",
+        "no",
+        "no"
+      ],
+      "default": [
+        "no",
+        "no",
+        "no"
+      ]
+    },
+    {
+      "video": "hr_fall_detection_3.mp4",
+      "t": 176,
+      "gt": "Lie",
+      "old": true,
+      "new": false,
+      "deterministic": [
+        "no",
+        "no",
+        "no"
+      ],
+      "default": [
+        "no",
+        "no",
+        "no"
+      ]
+    },
+    {
+      "video": "fall_detection_5.mp4",
+      "t": 144,
+      "gt": "Lie",
+      "old": true,
+      "new": false,
+      "deterministic": [
+        "no",
+        "no",
+        "no"
+      ],
+      "default": [
+        "no",
+        "no",
+        "no"
+      ]
+    },
+    {
+      "video": "fall_detection_5.mp4",
+      "t": 159,
+      "gt": "Lie",
+      "old": true,
+      "new": false,
+      "deterministic": [
+        "no",
+        "no",
+        "no"
+      ],
+      "default": [
+        "no",
+        "no",
+        "no"
+      ]
+    },
+    {
+      "video": "fall_detection_9.mp4",
+      "t": 75,
+      "gt": "Lie",
+      "old": false,
+      "new": true,
+      "deterministic": [
+        "yes",
+        "yes",
+        "yes"
+      ],
+      "default": [
+        "yes",
+        "yes",
+        "yes"
+      ]
+    }
+  ]
+}

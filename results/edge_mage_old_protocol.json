@@ -1,0 +1,60 @@
+{
+  "runs": 2,
+  "rows": [
+    {
+      "video": "hr_fall_detection_3.mp4",
+      "t": 152,
+      "gt": "Lie",
+      "old": true,
+      "new": false,
+      "mp4_frame": [
+        "yes",
+        "yes"
+      ]
+    },
+    {
+      "video": "hr_fall_detection_3.mp4",
+      "t": 176,
+      "gt": "Lie",
+      "old": true,
+      "new": false,
+      "mp4_frame": [
+        "yes",
+        "yes"
+      ]
+    },
+    {
+      "video": "fall_detection_5.mp4",
+      "t": 144,
+      "gt": "Lie",
+      "old": true,
+      "new": false,
+      "mp4_frame": [
+        "yes",
+        "yes"
+      ]
+    },
+    {
+      "video": "fall_detection_5.mp4",
+      "t": 159,
+      "gt": "Lie",
+      "old": true,
+      "new": false,
+      "mp4_frame": [
+        "yes",
+        "yes"
+      ]
+    },
+    {
+      "video": "fall_detection_9.mp4",
+      "t": 75,
+      "gt": "Lie",
+      "old": false,
+      "new": true,
+      "mp4_frame": [
+        "no",
+        "no"
+      ]
+    }
+  ]
+}
