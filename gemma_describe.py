@@ -67,7 +67,7 @@ class GemmaDescriber:
 
     def generate(self, messages: list[dict], max_new_tokens: int = 64,
                  temperature: float = 0.4, greedy: bool = False,
-                 prefix: str = "") -> dict:
+                 prefix: str = "", logits_processor=None) -> dict:
         enc = self.tokenizer.apply_chat_template(
             messages, add_generation_prompt=True, return_tensors="pt",
             return_dict=True, tokenize=True)
@@ -81,6 +81,8 @@ class GemmaDescriber:
 
         kwargs = dict(max_new_tokens=max_new_tokens, do_sample=not greedy,
                       pad_token_id=self.tokenizer.pad_token_id or 0)
+        if logits_processor is not None:
+            kwargs["logits_processor"] = logits_processor
         if not greedy:
             kwargs.update(temperature=temperature, top_p=0.9,
                           repetition_penalty=1.05)

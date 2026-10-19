@@ -1,0 +1,242 @@
+{
+  "n": 20,
+  "lie": 10,
+  "non_lie": 10,
+  "prompt_sys": "根据场景数据回答是否有人躺在地上，只输出 yes 或 no。示例：\n数据：{\"人物\":[{\"姿态\":\"站立\"}]} -> no\n数据：{\"人物\":[{\"姿态\":\"坐\"}]} -> no\n数据：{\"人物\":[{\"姿态\":\"躺卧\"}]} -> yes",
+  "gen_ms": {
+    "median": 34.0,
+    "mean": 36.7,
+    "std": 8.3,
+    "p95": 58.5
+  },
+  "total_ms_median": 53.1,
+  "tokens": 1,
+  "tp": 10,
+  "fn": 0,
+  "fp": 7,
+  "tn": 3,
+  "recall": 1.0,
+  "precision": 0.588,
+  "rows": [
+    {
+      "video": "hr_fall_detection_2.mp4",
+      "t": 29,
+      "gt": "Lie",
+      "pred": true,
+      "raw": "yes",
+      "posture": null,
+      "scene_ms": 244.0,
+      "gen_ms": 58.5,
+      "gen_tokens": 1
+    },
+    {
+      "video": "hr_fall_detection_2.mp4",
+      "t": 136,
+      "gt": "Lie",
+      "pred": true,
+      "raw": "yes",
+      "posture": null,
+      "scene_ms": 31.0,
+      "gen_ms": 60.8,
+      "gen_tokens": 1
+    },
+    {
+      "video": "hr_fall_detection_2.mp4",
+      "t": 165,
+      "gt": "Lie",
+      "pred": true,
+      "raw": "yes",
+      "posture": "躺卧",
+      "scene_ms": 20.8,
+      "gen_ms": 35.7,
+      "gen_tokens": 1
+    },
+    {
+      "video": "hr_fall_detection_3.mp4",
+      "t": 149,
+      "gt": "Lie",
+      "pred": true,
+      "raw": "yes",
+      "posture": null,
+      "scene_ms": 18.2,
+      "gen_ms": 33.6,
+      "gen_tokens": 1
+    },
+    {
+      "video": "hr_fall_detection_3.mp4",
+      "t": 152,
+      "gt": "Lie",
+      "pred": true,
+      "raw": "yes",
+      "posture": null,
+      "scene_ms": 17.1,
+      "gen_ms": 31.9,
+      "gen_tokens": 1
+    },
+    {
+      "video": "hr_fall_detection_3.mp4",
+      "t": 158,
+      "gt": "Lie",
+      "pred": true,
+      "raw": "yes",
+      "posture": null,
+      "scene_ms": 17.5,
+      "gen_ms": 41.0,
+      "gen_tokens": 1
+    },
+    {
+      "video": "hr_fall_detection_3.mp4",
+      "t": 176,
+      "gt": "Lie",
+      "pred": true,
+      "raw": "yes",
+      "posture": null,
+      "scene_ms": 22.1,
+      "gen_ms": 31.0,
+      "gen_tokens": 1
+    },
+    {
+      "video": "fall_detection_10.mp4",
+      "t": 63,
+      "gt": "Lie",
+      "pred": true,
+      "raw": "yes",
+      "posture": null,
+      "scene_ms": 17.9,
+      "gen_ms": 38.7,
+      "gen_tokens": 1
+    },
+    {
+      "video": "fall_detection_10.mp4",
+      "t": 66,
+      "gt": "Lie",
+      "pred": true,
+      "raw": "yes",
+      "posture": "躺卧",
+      "scene_ms": 17.4,
+      "gen_ms": 31.6,
+      "gen_tokens": 1
+    },
+    {
+      "video": "fall_detection_10.mp4",
+      "t": 79,
+      "gt": "Lie",
+      "pred": true,
+      "raw": "yes",
+      "posture": null,
+      "scene_ms": 19.4,
+      "gen_ms": 30.7,
+      "gen_tokens": 1
+    },
+    {
+      "video": "hr_fall_detection_1.mp4",
+      "t": 10,
+      "gt": "Stand",
+      "pred": false,
+      "raw": "no",
+      "posture": "站立",
+      "scene_ms": 39.3,
+      "gen_ms": 33.7,
+      "gen_tokens": 1
+    },
+    {
+      "video": "hr_fall_detection_1.mp4",
+      "t": 17,
+      "gt": "Stand",
+      "pred": false,
+      "raw": "no",
+      "posture": "站立",
+      "scene_ms": 19.3,
+      "gen_ms": 34.5,
+      "gen_tokens": 1
+    },
+    {
+      "video": "hr_fall_detection_1.mp4",
+      "t": 18,
+      "gt": "Stand",
+      "pred": true,
+      "raw": "yes",
+      "posture": "站立",
+      "scene_ms": 21.0,
+      "gen_ms": 32.1,
+      "gen_tokens": 1
+    },
+    {
+      "video": "hr_fall_detection_1.mp4",
+      "t": 19,
+      "gt": "Stand",
+      "pred": true,
+      "raw": "yes",
+      "posture": "站立",
+      "scene_ms": 17.8,
+      "gen_ms": 38.1,
+      "gen_tokens": 1
+    },
+    {
+      "video": "hr_fall_detection_1.mp4",
+      "t": 30,
+      "gt": "Stand",
+      "pred": false,
+      "raw": "no",
+      "posture": "站立",
+      "scene_ms": 17.1,
+      "gen_ms": 35.7,
+      "gen_tokens": 1
+    },
+    {
+      "video": "hr_fall_detection_1.mp4",
+      "t": 31,
+      "gt": "Stand",
+      "pred": true,
+      "raw": "yes",
+      "posture": "站立",
+      "scene_ms": 16.7,
+      "gen_ms": 35.4,
+      "gen_tokens": 1
+    },
+    {
+      "video": "hr_fall_detection_1.mp4",
+      "t": 32,
+      "gt": "Stand",
+      "pred": true,
+      "raw": "yes",
+      "posture": "站立",
+      "scene_ms": 19.9,
+      "gen_ms": 34.3,
+      "gen_tokens": 1
+    },
+    {
+      "video": "hr_fall_detection_1.mp4",
+      "t": 34,
+      "gt": "Sit",
+      "pred": true,
+      "raw": "yes",
+      "posture": "坐",
+      "scene_ms": 17.4,
+      "gen_ms": 31.2,
+      "gen_tokens": 1
+    },
+    {
+      "video": "hr_fall_detection_1.mp4",
+      "t": 35,
+      "gt": "Sit",
+      "pred": true,
+      "raw": "yes",
+      "posture": "坐",
+      "scene_ms": 16.9,
+      "gen_ms": 31.3,
+      "gen_tokens": 1
+    },
+    {
+      "video": "hr_fall_detection_1.mp4",
+      "t": 36,
+      "gt": "Sit",
+      "pred": true,
+      "raw": "yes",
+      "posture": "坐",
+      "scene_ms": 17.0,
+      "gen_ms": 33.8,
+      "gen_tokens": 1
+    }
+  ]
+}
