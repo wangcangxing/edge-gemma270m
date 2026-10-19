@@ -1,0 +1,313 @@
+{
+  "test_total": 592,
+  "test_counts": {
+    "2p": 6,
+    "3p": 0
+  },
+  "groups": {
+    "test_2p": {
+      "n": 6,
+      "person_ok": 1.0,
+      "obj_recall": 0.0,
+      "halluc_rate": 0.0,
+      "rows": [
+        {
+          "image": "hr_fall_detection_3_t0041_750.jpg",
+          "video": "hr_fall_detection_3",
+          "split": "test",
+          "n": 2,
+          "desc": "画面中有2人，画面下方一人坐，画面下方一人坐。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "hr_fall_detection_3_t0068_250.jpg",
+          "video": "hr_fall_detection_3",
+          "split": "test",
+          "n": 2,
+          "desc": "画面中有2人，画面下方一人站立，画面下方一人站立。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "hr_fall_detection_3_t0068_750.jpg",
+          "video": "hr_fall_detection_3",
+          "split": "test",
+          "n": 2,
+          "desc": "画面中有2人，画面下方一人站立，画面下方一人站立。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "hr_fall_detection_3_t0190_750.jpg",
+          "video": "hr_fall_detection_3",
+          "split": "test",
+          "n": 2,
+          "desc": "画面中有2人，画面右侧一人站立，画面右下方一人站立。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "hr_fall_detection_3_t0243_750.jpg",
+          "video": "hr_fall_detection_3",
+          "split": "test",
+          "n": 2,
+          "desc": "画面中有2人，画面下方一人站立，画面中央一人站立。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "hr_fall_detection_3_t0351_750.jpg",
+          "video": "hr_fall_detection_3",
+          "split": "test",
+          "n": 2,
+          "desc": "画面中有2人，画面右下方一人坐，画面右侧一人。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        }
+      ]
+    },
+    "extra_2p": {
+      "n": 20,
+      "person_ok": 1.0,
+      "obj_recall": 0.0,
+      "halluc_rate": 0.0,
+      "rows": [
+        {
+          "image": "fall_detection_9_t0117_250.jpg",
+          "video": "fall_detection_9",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面中央一人站立，画面下方一人。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_9_t0086_250.jpg",
+          "video": "fall_detection_9",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面左下方一人站立，画面下方一人坐。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_9_t0099_250.jpg",
+          "video": "fall_detection_9",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面中央一人站立，画面下方一人。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_9_t0080_250.jpg",
+          "video": "fall_detection_9",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面中央一人站立，画面下方一人站立。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_10_t0030_750.jpg",
+          "video": "fall_detection_10",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面下方一人坐，画面中央一人坐。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_6_t0023_250.jpg",
+          "video": "fall_detection_6",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面中央一人坐，画面中央一人坐。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_10_t0029_750.jpg",
+          "video": "fall_detection_10",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面下方一人坐，画面中央一人坐。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_9_t0124_250.jpg",
+          "video": "fall_detection_9",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面右侧一人站立，画面下方一人。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_10_t0173_250.jpg",
+          "video": "fall_detection_10",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面中央一人，画面下方一人坐。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_9_t0106_750.jpg",
+          "video": "fall_detection_9",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面中央一人站立，画面下方一人。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_5_t0009_750.jpg",
+          "video": "fall_detection_5",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面中央一人坐，画面中央一人。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_9_t0123_750.jpg",
+          "video": "fall_detection_9",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面右侧一人站立，画面下方一人。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_9_t0070_250.jpg",
+          "video": "fall_detection_9",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面下方一人站立，画面中央一人。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_9_t0014_750.jpg",
+          "video": "fall_detection_9",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面中央一人站立，画面下方一人站立。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_9_t0124_750.jpg",
+          "video": "fall_detection_9",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面右侧一人站立，画面下方一人。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_6_t0107_750.jpg",
+          "video": "fall_detection_6",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面中央一人坐，画面中央一人。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_9_t0069_750.jpg",
+          "video": "fall_detection_9",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面下方一人站立，画面中央一人。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_10_t0031_750.jpg",
+          "video": "fall_detection_10",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面中央一人坐，画面下方一人坐。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_10_t0030_250.jpg",
+          "video": "fall_detection_10",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面下方一人坐，画面中央一人坐。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_9_t0082_750.jpg",
+          "video": "fall_detection_9",
+          "split": "train",
+          "n": 2,
+          "desc": "画面中有2人，画面中央一人站立，画面下方一人站立。",
+          "person_ok": true,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        }
+      ]
+    },
+    "all_3p": {
+      "n": 2,
+      "person_ok": 0.0,
+      "obj_recall": 0.0,
+      "halluc_rate": 0.0,
+      "rows": [
+        {
+          "image": "fall_detection_9_t0013_750.jpg",
+          "video": "fall_detection_9",
+          "split": "train",
+          "n": 3,
+          "desc": "画面中有2人，画面下方一人站立，画面下方一人站立。",
+          "person_ok": false,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        },
+        {
+          "image": "fall_detection_9_t0014_250.jpg",
+          "video": "fall_detection_9",
+          "split": "train",
+          "n": 3,
+          "desc": "画面中有2人，画面下方一人站立，画面中央一人站立。",
+          "person_ok": false,
+          "obj_recall": 0.0,
+          "hallucinated": []
+        }
+      ]
+    }
+  }
+}
