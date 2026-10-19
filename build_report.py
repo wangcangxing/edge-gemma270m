@@ -36,6 +36,9 @@ det = json.loads((RESULTS / "edge_mage_determinism.json").read_text(encoding="ut
 rerun = json.loads((RESULTS / "edge_mage_rerun_fall.json").read_text(encoding="utf-8"))
 yesno20 = json.loads((RESULTS / "edge_yesno20.json").read_text(encoding="utf-8"))
 lie19 = json.loads((RESULTS / "edge_lie19_diag.json").read_text(encoding="utf-8"))
+multi = json.loads((RESULTS / "edge_multi_person.json").read_text(encoding="utf-8"))
+yolo_metrics = json.loads((RESULTS / "edge_yolo_test_metrics.json").read_text(encoding="utf-8"))
+two_tp = json.loads((RESULTS / "edge_two_tp_check.json").read_text(encoding="utf-8"))
 rows_int8, rows_bf16 = q_int8["tuned_rows"], q_bf16["tuned_rows"]
 q8s, q16s = q_int8["summary"]["tuned"], q_bf16["summary"]["tuned"]
 exact_8_16 = sum(a["desc"] == b["desc"] for a, b in zip(rows_int8, rows_bf16))
@@ -211,6 +214,10 @@ bullet("精度不受线程数影响：1T/2T/14T 的人数一致与物体召回�
        "int8 与 bf16 逐字一致 77/100，指标同为 100%/100%，差异全为同义句。")
 bullet("与 Mage-VL 同帧对照（207 帧）：跌倒召回 Mage 22.6%，Edge 26.4%（域内训练）/ 18.9%（未见测试视频）；"
        "描述任务 Mage 人数 77%、36 字，Edge 100%、16 字；两者都远不足以单独判定“躺地”。")
+bullet("多人帧：2 人计数 100%（26/26），但物体召回 0%（多人目标模板不含物体）；3 人仅 2 帧、全部数错。")
+bullet("YOLOv10n 在 test：人数准确 95.0%/91.2%，人体框召回 93.0%/90.9%，姿态 lie 0/19；"
+       "19 个 lie 帧全部是“人体框未检出”。")
+bullet("yes/no 任务：Edge 1 token 34 ms vs Mage 640 ms，延迟可比；但 Gemma 不守规则（precision 58.8%），精度不可比。")
 bullet("描述上限 = 检测器上限：只有 COCO 80 类 + 3 类姿态，没有颜色/材质/动作；"
        "测试集仍是同一家庭按视频留出，未验证跨场景泛化。")
 
@@ -239,7 +246,8 @@ bullet("幻觉率：描述里出现了不属于该场景（全局物体 + 每人
 bullet("延迟：单次 generate 的墙钟秒数；tok/s = 新生成 token 数 / 秒，含 prefill。")
 bullet("常驻：参数字节数（bf16 / int8 实际张量）；GPU 峰值取一次生成内 max_memory_allocated。")
 bullet(f"测试集：test 592 帧中随机抽 100 帧（随机种子 1），其中 {sum(1 for r in tuned if r['n'] == 0)} 帧无人、"
-       f"{sum(1 for r in tuned if r['n'] == 1)} 帧 1 人、{sum(1 for r in tuned if r['n'] == 2)} 帧 2 人。")
+       f"{sum(1 for r in tuned if r['n'] == 1)} 帧 1 人、{sum(1 for r in tuned if r['n'] == 2)} 帧 2 人"
+       "（该抽样未抽到 2 人；test 全量另有 6 个 2 人帧，见 5.5）。")
 
 # ---------------- 2 数据 ----------------
 doc.add_heading("2 数据集", level=1)
@@ -362,9 +370,9 @@ para("与 14 线程基线相比，2 线程与 1 线程各只有 1 条同义改�
 doc.add_heading("4.3 线程数反直觉", level=2)
 table(["配置", "Gemma int8 单句", "tok/s", "YOLO CPU 每帧"], [
     ["默认 14 线程", "0.658 s", "24.3", "138 ms"],
-    ["2 线程（绑 0,2）", "0.452 s", "35.4", "41 ms"],
+    ["2 线程（绑 0,2）", "0.45~0.56 s", "28.6~35.4", "33~44 ms"],
 ], widths=[4.5, 4.0, 2.5, 4.0])
-caption("表 10 线程数对比：小模型上限由同步开销决定，开满反而互相等")
+caption("表 10 线程数对比：小模型上限由同步开销决定，开满反而互相等（2 线程为多次运行范围）")
 
 doc.add_heading("4.3.1 姿态开启复核（20 帧）", level=3)
 post_rows = []
@@ -414,6 +422,7 @@ table(["指标", "基座 270M", "+ LoRA"], [
 caption("表 14 test 100 帧，同一提示词（无 few-shot）对照")
 para("幻觉率口径：描述中出现了不属于该帧允许集合（全局物体 ∪ 每人旁边物体 ∪ “人”）的 COCO 类别词，"
      "按行计；同一行提到多个也只计 1 行。")
+para("物体召回口径：这里指“描述里提到场景物体名的比例”，不是检测器召回；检测器没有 COCO 真值，见 5.6。")
 
 table(["指标", "bf16（GPU）", "int8（CPU，1 线程）"], [
     ["人数一致率", f"{q16s['person_ok']*100:.0f}%", f"{q8s['person_ok']*100:.0f}%"],
@@ -461,6 +470,72 @@ table(["场景输入", "输出", "来源"], [
 ], widths=[5.0, 7.5, 3.0])
 caption("表 17 典型输出（句子由模型生成，非模板拼接）")
 
+doc.add_heading("5.5 多人帧（2 人 / 3 人）", level=2)
+g = multi["groups"]
+pool = g["test_2p"]["rows"] + g["extra_2p"]["rows"]
+pool_person = sum(r["person_ok"] for r in pool) / len(pool)
+pool_recall = sum(r["obj_recall"] for r in pool) / len(pool)
+pool_hall = sum(1 for r in pool if r["hallucinated"]) / len(pool)
+table(["组", "来源", "n", "人数一致", "物体召回", "幻觉率"], [
+    ["test 2 人（全部）", "test", g["test_2p"]["n"],
+     f"{g['test_2p']['person_ok']*100:.0f}%", f"{g['test_2p']['obj_recall']*100:.0f}%",
+     f"{g['test_2p']['halluc_rate']*100:.0f}%"],
+    ["补充 2 人", "非 test，seed=1 随机 20", g["extra_2p"]["n"],
+     f"{g['extra_2p']['person_ok']*100:.0f}%", f"{g['extra_2p']['obj_recall']*100:.0f}%",
+     f"{g['extra_2p']['halluc_rate']*100:.0f}%"],
+    ["2 人合并", "test + 补充", len(pool),
+     f"{pool_person*100:.0f}%", f"{pool_recall*100:.0f}%", f"{pool_hall*100:.0f}%"],
+    ["3 人（全数据集）", "仅 2 帧，均在 train", g["all_3p"]["n"],
+     f"{g['all_3p']['person_ok']*100:.0f}%", f"{g['all_3p']['obj_recall']*100:.0f}%",
+     f"{g['all_3p']['halluc_rate']*100:.0f}%"],
+], widths=[3.6, 4.6, 1.4, 2.6, 2.6, 2.2])
+caption("表 22 多人帧：test 只有 6 个 2 人帧、0 个 3 人帧（无法按要求抽 20 个）")
+para("2 人计数 26/26 全对，但描述完全不提物体——多人目标模板只写人数与前两人姿态，"
+     "物体召回 0% 是训练目标设计导致，不是检测器没检到。3 人两帧都输出“画面中有2人”，"
+     "全库只有 2 个 3 人训练样本，不足以覆盖。")
+
+doc.add_heading("5.6 YOLOv10n 在 test 上的检测指标", level=2)
+s100, sall = yolo_metrics["sample100"], yolo_metrics["all_test"]
+table(["指标", "test 100 帧", "test 592 帧"], [
+    ["人数检测准确率（检测=标注）", f"{s100['person_count_accuracy']*100:.1f}%",
+     f"{sall['person_count_accuracy']*100:.1f}%"],
+    ["人数 MAE", f"{s100['person_count_mae']}", f"{sall['person_count_mae']}"],
+    ["人体框召回（IoU≥0.5）", f"{s100['person_box_recall']*100:.1f}%",
+     f"{sall['person_box_recall']*100:.1f}%"],
+    ["COCO 物体召回", "无法计算（自一致性 100%）", "无法计算（自一致性 100%）"],
+    ["姿态：站立", f"{s100['posture']['站立']['recall']*100:.1f}%",
+     f"{sall['posture']['站立']['recall']*100:.1f}%"],
+    ["姿态：坐", f"{s100['posture']['坐']['recall']*100:.1f}%",
+     f"{sall['posture']['坐']['recall']*100:.1f}%"],
+    ["姿态：躺卧", "无样本", f"{sall['posture']['躺卧']['recall']*100:.1f}%（0/19）"],
+], widths=[5.2, 5.0, 5.0])
+caption("表 23 YOLOv10n + 姿态在 test 划分上的检测指标")
+para("三个口径限制：① 标注每帧只标主体一人，所以“人数准确率”实际是“是否恰好检出 1 人”，"
+     "592 帧里 6 帧检出 2 人被计错、但第二人可能真实存在；② COCO 物体没有真值，"
+     "100% 只是重跑与建库物体名一致，不是召回（表 14 的“物体召回”是描述里提到场景物体名，口径不同）；"
+     "③ 姿态在 test 100 里没有 lie 样本，592 帧里 19 个 lie 全部漏检。")
+
+doc.add_heading("5.7 19 个躺卧帧逐帧诊断", level=2)
+diag = lie19["rows"]
+summary = lie19["summary"]
+n_nobox = sum(v for k, v in summary.items() if "未检出" in k)
+n_wrong = sum(v for k, v in summary.items() if "判成" in k)
+n_miss = sum(v for k, v in summary.items() if "未判" in k)
+table(["诊断", "帧数"], [
+    ["未检出人体框（YOLO conf=0.01 也无 IoU≥0.5 的框）", n_nobox],
+    ["检出框、姿态判错", n_wrong],
+    ["检出框、姿态未判", n_miss],
+], widths=[10.5, 3.0])
+caption("表 24 19 个 lie 帧的失败环节：全部卡在人体检测")
+low = {}
+for r in diag:
+    low[r["posture_low"] or "无信号"] = low.get(r["posture_low"] or "无信号", 0) + 1
+para(f"姿态模型在 conf≥0.01 下并非全盲：躺卧 {low.get('躺卧',0)} 帧、坐 {low.get('坐',0)} 帧、"
+     f"站立 {low.get('站立',0)} 帧、无信号 {low.get('无信号',0)} 帧；"
+     "19 帧里最大人体框 IoU 只有 0.019。"
+     "对比 2 个 TP：hr_2 t165 / fall_10 t66 的人体框 IoU 0.987 / 0.996、躺卧置信度 0.892 / 0.942，"
+     "属于完全不同的难度子集。")
+
 # ---------------- 6 结论 ----------------
 doc.add_heading("6 结论", level=1)
 for i, text in enumerate([
@@ -477,6 +552,10 @@ for i, text in enumerate([
     "长描述 10.8 s → 一句 0.45~0.7 s，但描述能力从“开放式”降为“一句话符号转述”。",
     "同帧对照（207 帧）：跌倒召回 Mage 22.6% vs Edge 26.4%（域内训练）/ 18.9%（未见测试视频），"
     "两者都 <30%；Edge 的“持平”主要来自域内监督，不是架构优势。",
+    "多人：2 人计数 100%（26/26），但物体召回 0%（模板不含物体）；3 人仅 2 帧且全部数错。",
+    "YOLO test：人数 95.0%/91.2%，人体框 93.0%/90.9%，姿态 lie 0/19；19/19 是人体框未检出，"
+    "瓶颈在检测器而非姿态分类。",
+    "yes/no：Edge 34 ms vs Mage 640 ms，延迟可比；但 270M 的 yes/no precision 58.8%，精度不可比。",
 ], 1):
     para(f"{i}. {text}")
 
@@ -486,8 +565,11 @@ for text in [
     "未导出 ONNX / GGUF / RKNN，未在 ARM、NPU 或目标板卡上实测；本机是 x86 + RTX 5060 Ti。",
     "视频路径只做了 3 帧 smoke test，没有逐帧事件评估（跌倒触发、误报率等）。",
     "模板监督把句式限制在 14~23 字，不会产生开放式长描述；“室内”是写死的场景假设，户外帧会说错。",
-    "数据几乎全是正常光照、单人场景（86.7%），多人（81 帧）与夜间未覆盖。",
-    "姿态标签在训练时来自数据集标注、推理时来自检测器（跨域 lie 召回约 14.4%），存在训练/推理分布差。",
+    "数据几乎全是正常光照、单人场景（86.7%）；多人全库 81 帧（test 仅 6 帧 2 人、0 帧 3 人），夜间未覆盖。",
+    "姿态标签在训练时来自数据集标注、推理时来自检测器：历史混合评估 lie 召回约 14.4%，"
+    "test hr_3 的 19 帧为 0/19（全部人体框未检出）。",
+    "COCO 物体没有真值：真实物体召回无法测，只能报告“重跑与建库物体名一致”（100%）。",
+    "多人标注每帧只标主体一人，2 人/3 人检测无法用这套标注评；多人帧另做了小样本补充。",
     "测试集与训练集同域，指标不能外推到其他家庭、其他摄像头角度。",
 ]:
     bullet(text)
@@ -523,6 +605,8 @@ para("两边都只认“躺地”这一类，精度 100% 表示报出的 yes 全
 para("统计检验（同 207 帧配对 McNemar 精确检验，Mage vs Edge v5）：b=6（仅 Mage 对）、c=8（仅 Edge 对），"
      "双侧 p=0.79，差异不显著。召回 95% Wilson CI：Mage 22.6% [13.5, 35.5]%、"
      "Edge 26.4% [16.4, 39.6]%、foldA 18.9% [10.6, 31.4]%。")
+para("注意：207 帧包含 fall_detection_* 训练视频里的 lie 帧；只看 test hr_3 的 19 个 lie 帧结果是 0/19"
+     "（见 5.7），两组不矛盾，分母不同。")
 
 doc.add_heading("8.3 描述任务（100 帧）", level=2)
 table(["指标", "Mage-VL", "Edge"], [
@@ -558,7 +642,8 @@ doc.add_heading("8.5 结论与边界", level=2)
 for text in [
     "同帧源（JPG）下：Mage 22.6% / Edge v5 26.4% / Edge foldA 18.9%，三者都远不足以单独判定“躺地”。",
     "Edge 的“略高”依赖姿态检测器见过该域（v5_mixed/foldB）；换成未见 hr_1/hr_3 的 foldA 就低于 Mage。",
-    "成本差距明确：Mage 9.32 GB / 0.64 s（单个 yes/no），Edge 0.55 GB；描述任务 0.71 s。",
+    "成本差距明确：Mage 9.32 GB / 0.64 s（单个 yes/no）；Edge 0.55 GB，同一 yes/no 任务 34 ms"
+    "（见 8.7），描述任务 0.71 s。",
     "描述能力方向相反：Mage 更开放（36 字、场景语义），Edge 更准但更短（16 字、只有检测到的类别）。",
     "边界：14 行缺 250 ms 帧；foldA 只排除了 hr_1/hr_3；测试域是计算机教室；Mage 0.64 s 是 yes/no 而非长描述。",
 ]:
@@ -591,6 +676,50 @@ para("20 帧 yes/no 子集的 10 个 lie 来自 hr_2（3）、hr_3（4）、fall
      "而 19 帧里最大人体框 IoU 仅 0.019。"
      "19 帧全部来自 hr_3；交集 4 帧（hr_3 t149/152/158/176）全部漏检。"
      "因此 20% 与 0/19 是两个不同子集的估计，不矛盾、也不能互相校验；引用时必须带子集与分母。")
+
+doc.add_heading("8.7 Edge 的 yes/no 版本（20 帧）", level=2)
+yg = yesno20
+table(["系统", "任务", "median", "mean", "std", "p95"], [
+    ["Edge（1 token）", "yes/no", f"{yg['gen_ms']['median']}",
+     f"{yg['gen_ms']['mean']}", f"{yg['gen_ms']['std']}", f"{yg['gen_ms']['p95']}"],
+    ["Edge 端到端", "检测+生成", f"{yg['total_ms_median']}", "—", "—", "—"],
+    ["Mage-VL", "yes/no", "640", "—", "—", "—"],
+], widths=[3.8, 3.0, 2.2, 2.2, 2.0, 2.0])
+caption("表 25 同任务（yes/no）的延迟：Edge 1 token vs Mage 0.64 s（单位 ms）")
+ep = yg
+rule_tp = sum(1 for r in ep["rows"] if r["gt"] == "Lie" and r["posture"] == "躺卧")
+rule_fn = sum(1 for r in ep["rows"] if r["gt"] == "Lie" and r["posture"] != "躺卧")
+rule_fp = sum(1 for r in ep["rows"] if r["gt"] != "Lie" and r["posture"] == "躺卧")
+rule_tn = sum(1 for r in ep["rows"] if r["gt"] != "Lie" and r["posture"] != "躺卧")
+table(["口径", "TP/FN/FP/TN", "召回", "精度", "准确率"], [
+    ["Gemma 答 yes/no", f"{ep['tp']}/{ep['fn']}/{ep['fp']}/{ep['tn']}",
+     f"{ep['recall']*100:.0f}%", f"{ep['precision']*100:.0f}%",
+     f"{(ep['tp']+ep['tn'])/ep['n']*100:.0f}%"],
+    ["姿态规则判 lie", f"{rule_tp}/{rule_fn}/{rule_fp}/{rule_tn}",
+     f"{rule_tp/(rule_tp+rule_fn)*100:.0f}%",
+     f"{rule_tp/(rule_tp+rule_fp)*100:.0f}%" if rule_tp + rule_fp else "—",
+     f"{(rule_tp+rule_tn)/ep['n']*100:.0f}%"],
+], widths=[4.2, 4.0, 2.4, 2.4, 2.4])
+caption("表 26 同一 20 帧上的精度：延迟可比，但 Gemma 的 yes/no 不守规则")
+para("首 token 被约束为 yes/no，模型仍按“有没有人”回答：10 个 lie 全 yes，但 10 个 stand/sit 里 7 个也 yes"
+     "（precision 58.8%）。姿态规则 precision 100% 但召回只有 20%。"
+     "所以这次只证明延迟可比，不能证明 Edge 的 yes/no 精度可比；要当分类器需单独训练 adapter。")
+
+# ---------------- 9 新增实验清单 ----------------
+doc.add_heading("9 新增实验结论清单", level=1)
+table(["实验", "样本", "关键结果", "结论"], [
+    ["多人帧", "test 2p 6 + 非 test 2p 20 + 3p 2", "2p 人数 100%、物体召回 0%；3p 0/2",
+     "计数可用，物体与 3 人不可用"],
+    ["YOLO test 指标", "test 100 / 592", "人数 95.0%/91.2%；人体框 93.0%/90.9%；lie 0/19",
+     "单人检测可用，躺卧检测失效"],
+    ["19 lie 诊断", "19 帧", "19/19 人体框未检出；姿态低分信号 3 lie/3 sit/4 stand",
+     "瓶颈在人体检测，不是姿态分类"],
+    ["Edge yes/no", "20 帧（10 lie）", "34 ms vs Mage 640 ms；precision 58.8%",
+     "延迟可比，精度不可比"],
+    ["姿态规则子集", "20 帧 vs 19 帧", "2 TP 在 hr_2/fall_10，与 19 帧无重叠",
+     "20% 与 0/19 是不同子集"],
+], widths=[3.2, 4.6, 5.4, 4.2])
+caption("表 27 新增实验一览：所有结论均带样本与子集口径")
 
 # ---------------- 附录 ----------------
 doc.add_heading("附录 A 复现命令", level=1)
