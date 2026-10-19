@@ -1,0 +1,68 @@
+{
+  "test_total": 592,
+  "sample100": {
+    "n": 100,
+    "person_count_accuracy": 0.95,
+    "person_count_mae": 0.05,
+    "person_count_confusion": {
+      "1->0": 5,
+      "1->1": 95
+    },
+    "object_self_consistency_recall": 1.0,
+    "object_frames_with_ref": 97,
+    "posture": {
+      "站立": {
+        "n": 69,
+        "正确": 68,
+        "错判": 1,
+        "recall": 0.986
+      },
+      "坐": {
+        "n": 31,
+        "未检出/未判": 7,
+        "正确": 22,
+        "错判": 2,
+        "recall": 0.71
+      },
+      "躺卧": {
+        "n": 0,
+        "recall": null
+      }
+    },
+    "person_box_recall": 0.93
+  },
+  "all_test": {
+    "n": 592,
+    "person_count_accuracy": 0.912,
+    "person_count_mae": 0.088,
+    "person_count_confusion": {
+      "1->0": 46,
+      "1->1": 540,
+      "1->2": 6
+    },
+    "object_self_consistency_recall": 1.0,
+    "object_frames_with_ref": 569,
+    "posture": {
+      "站立": {
+        "n": 426,
+        "正确": 397,
+        "错判": 12,
+        "未检出/未判": 17,
+        "recall": 0.932
+      },
+      "坐": {
+        "n": 147,
+        "未检出/未判": 22,
+        "正确": 119,
+        "错判": 6,
+        "recall": 0.81
+      },
+      "躺卧": {
+        "n": 19,
+        "未检出/未判": 19,
+        "recall": 0.0
+      }
+    },
+    "person_box_recall": 0.909
+  }
+}
