@@ -378,8 +378,6 @@ caption("表 11 完整 pipeline（姿态开启、20 帧、全局预热 6 次）�
 para("4t 两次中位 455.1 / 513.8 ms，6t 472.5 / 473.6 ms；逐帧胜负 13/20 与 3/20 两次方向翻转。"
      "8t 以上明显劣化（687 / 1248 ms）。因此完整 pipeline 下推荐 4~6 线程，"
      "“4t 唯一最优”不成立；1t/2t 更慢，14t 最差。")
-para("注：两组测量条件略有差异（14 线程组来自 pipeline 稳定值，2 线程组关闭了姿态模型），"
-     "但 Gemma 与 YOLO 的差距分别为 1.45 倍与 3.4 倍，方向一致。")
 
 doc.add_heading("4.4 端到端样例", level=2)
 rec_dog = dog["records"][0]
@@ -412,6 +410,8 @@ table(["指标", "基座 270M", "+ LoRA"], [
      f"{min(r['len'] for r in tuned)}~{max(r['len'] for r in tuned)}"],
 ], widths=[4.0, 4.5, 4.5])
 caption("表 14 test 100 帧，同一提示词（无 few-shot）对照")
+para("幻觉率口径：描述中出现了不属于该帧允许集合（全局物体 ∪ 每人旁边物体 ∪ “人”）的 COCO 类别词，"
+     "按行计；同一行提到多个也只计 1 行。")
 
 table(["指标", "bf16（GPU）", "int8（CPU，1 线程）"], [
     ["人数一致率", f"{q16s['person_ok']*100:.0f}%", f"{q8s['person_ok']*100:.0f}%"],
@@ -421,6 +421,7 @@ table(["指标", "bf16（GPU）", "int8（CPU，1 线程）"], [
     ["逐字一致", "基线", f"{exact_8_16}/{len(rows_int8)}"],
 ], widths=[4.0, 4.5, 4.5])
 caption("表 15 int8 与 bf16 的精度对照（同一 100 帧，贪心解码）")
+para("幻觉率沿用表 14 口径；“逐字一致”按整句完全相等计（标点也算）。")
 para(f"{len(rows_int8)-exact_8_16} 条差异全部是同义改写，例如 int8“画面下方有人站立，椅子就在旁边。”"
      "对应 bf16“画面下方有一人站立，旁边是椅子。”，没有人数、物体或位置的事实性差异。")
 
@@ -497,6 +498,8 @@ para("跌倒判定用 Mage 跨域协议的原帧：probe 记录 221 行，能映
      "（53 Lie / 79 Stand / 75 Sit），Mage 与 Edge 使用完全相同的 207 个 JPG 文件。"
      "Mage 重跑问题与原 probe 一致（Q_LIE），贪心解码；Edge 用同一帧跑 YOLO + 姿态 + Gemma，"
      "描述含“躺/卧”即判 lie。另做一组 100 帧描述任务：test 划分、seed=1，与 207 帧只有 2 个文件重叠。")
+para("fold 定义：foldA 的训练集排除 hr_fall_detection_1 / hr_fall_detection_3（这两段在 foldA 的 val 中）；"
+     "foldB 排除 hr_fall_detection_2；v5_mixed 使用全部域视频。因此只有 foldA 对这两个测试视频是“未见”的。")
 
 doc.add_heading("8.2 跌倒判定（207 帧）", level=2)
 fall_rows = []
@@ -515,6 +518,9 @@ table(["系统", "TP/FN/FP", "召回", "精度", "准确率"], fall_rows,
 caption("表 18 跌倒判定：同一 207 帧、同一标签、同一判定（Mage 0.64 s / 9.32 GB；Edge 0.55 GB）")
 para("两边都只认“躺地”这一类，精度 100% 表示报出的 yes 全是真 lie；召回都不到 30%。"
      "Mage 重跑 22.6% 与旧记录 28.3% 的差别来自取帧（JPG vs MP4 整数秒），不是随机性（见 8.4）。")
+para("统计检验（同 207 帧配对 McNemar 精确检验，Mage vs Edge v5）：b=6（仅 Mage 对）、c=8（仅 Edge 对），"
+     "双侧 p=0.79，差异不显著。召回 95% Wilson CI：Mage 22.6% [13.5, 35.5]%、"
+     "Edge 26.4% [16.4, 39.6]%、foldA 18.9% [10.6, 31.4]%。")
 
 doc.add_heading("8.3 描述任务（100 帧）", level=2)
 table(["指标", "Mage-VL", "Edge"], [
@@ -526,6 +532,9 @@ table(["指标", "Mage-VL", "Edge"], [
     ["峰值显存", f"{cmp_desc['mage_peak_gb']} GB", f"0.55 GB"],
 ], widths=[4.5, 5.0, 5.0])
 caption("表 19 描述任务：同一 100 帧、同一句中文描述指令（这批恰好 0 个 lie）")
+para("姿态口径：真值取数据集标注（站立/坐/躺卧）；描述含对应词（站立/站、坐、躺/卧）记“正确”，"
+     "含其他姿态词但非真值记“错误”，不含任何姿态词记“未提”。"
+     "7 帧无姿态标注（含 5 个无人帧）不计入三者，百分比以全部 100 帧为分母。")
 para("Mage 的 23 次人数失败主要是只描述教室、没提人；Edge 不会漏人，但没有教室/白板/投影仪这类场景语义。")
 
 doc.add_heading("8.4 确定性检验（5 个翻转帧）", level=2)
