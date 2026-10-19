@@ -1,4 +1,4 @@
-﻿r"""生成《端侧语义描述实测报告》DOCX（数据全部从 results/*.json 读，避免手抄错）。"""
+r"""生成《端侧语义描述实测报告》DOCX（数据全部从 results/*.json 读，避免手抄错）。"""
 from __future__ import annotations
 
 import json
@@ -28,6 +28,11 @@ bench1 = json.loads((RESULTS / "edge_bench_1c1t.json").read_text(encoding="utf-8
 prec = json.loads((RESULTS / "edge_thread_precision.json").read_text(encoding="utf-8"))["summary"]
 q_int8 = json.loads((RESULTS / "edge_int8_1t.json").read_text(encoding="utf-8"))
 q_bf16 = json.loads((RESULTS / "edge_bf16_greedy.json").read_text(encoding="utf-8"))
+cmp_desc = json.loads((RESULTS / "edge_edge_vs_mage.json").read_text(encoding="utf-8"))
+cmp_fall = json.loads((RESULTS / "edge_edge_vs_mage_fall.json").read_text(encoding="utf-8"))
+folds = json.loads((RESULTS / "edge_posture_folds_fall.json").read_text(encoding="utf-8"))
+det = json.loads((RESULTS / "edge_mage_determinism.json").read_text(encoding="utf-8"))
+rerun = json.loads((RESULTS / "edge_mage_rerun_fall.json").read_text(encoding="utf-8"))
 rows_int8, rows_bf16 = q_int8["tuned_rows"], q_bf16["tuned_rows"]
 q8s, q16s = q_int8["summary"]["tuned"], q_bf16["summary"]["tuned"]
 exact_8_16 = sum(a["desc"] == b["desc"] for a, b in zip(rows_int8, rows_bf16))
@@ -201,6 +206,8 @@ bullet("270M 这个尺寸上 GPU 没有优势：GPU bf16 0.55 s 与 CPU int8 0.6
        "2 线程反而快于 14 线程（0.45 s vs 0.66 s）。")
 bullet("精度不受线程数影响：1T/2T/14T 的人数一致与物体召回都是 100%，逐字一致 39/40（唯一差异为同义改写）；"
        "int8 与 bf16 逐字一致 77/100，指标同为 100%/100%，差异全为同义句。")
+bullet("与 Mage-VL 同帧对照（207 帧）：跌倒召回 Mage 22.6%，Edge 26.4%（域内训练）/ 18.9%（未见测试视频）；"
+       "描述任务 Mage 人数 77%、36 字，Edge 100%、16 字；两者都远不足以单独判定“躺地”。")
 bullet("描述上限 = 检测器上限：只有 COCO 80 类 + 3 类姿态，没有颜色/材质/动作；"
        "测试集仍是同一家庭按视频留出，未验证跨场景泛化。")
 
@@ -448,6 +455,8 @@ for i, text in enumerate([
     "泛化未证明：测试按视频留出，但仍是同一家庭同一机位；跨场景/跨机位需要重新采数据验证。",
     "与 Mage-VL 路线相比：权重 8.83 GiB → 0.499 GiB，峰值显存 10.5 GB → 0.55 GB，"
     "长描述 10.8 s → 一句 0.45~0.7 s，但描述能力从“开放式”降为“一句话符号转述”。",
+    "同帧对照（207 帧）：跌倒召回 Mage 22.6% vs Edge 26.4%（域内训练）/ 18.9%（未见测试视频），"
+    "两者都 <30%；Edge 的“持平”主要来自域内监督，不是架构优势。",
 ], 1):
     para(f"{i}. {text}")
 
@@ -460,6 +469,70 @@ for text in [
     "数据几乎全是正常光照、单人场景（86.7%），多人（81 帧）与夜间未覆盖。",
     "姿态标签在训练时来自数据集标注、推理时来自检测器（跨域 lie 召回约 14.4%），存在训练/推理分布差。",
     "测试集与训练集同域，指标不能外推到其他家庭、其他摄像头角度。",
+]:
+    bullet(text)
+
+# ---------------- 8 与 Mage-VL 对照 ----------------
+doc.add_heading("8 与 Mage-VL 对照（控制变量）", level=1)
+
+doc.add_heading("8.1 对齐方式", level=2)
+para("跌倒判定用 Mage 跨域协议的原帧：probe 记录 221 行，能映射回 250/750 ms 抽帧 JPG 的 207 帧"
+     "（53 Lie / 79 Stand / 75 Sit），Mage 与 Edge 使用完全相同的 207 个 JPG 文件。"
+     "Mage 重跑问题与原 probe 一致（Q_LIE），贪心解码；Edge 用同一帧跑 YOLO + 姿态 + Gemma，"
+     "描述含“躺/卧”即判 lie。另做一组 100 帧描述任务：test 划分、seed=1，与 207 帧只有 2 个文件重叠。")
+
+doc.add_heading("8.2 跌倒判定（207 帧）", level=2)
+fall_rows = []
+for label, m in (
+    ("Mage-VL（重跑，JPG 帧）", rerun["new"]),
+    ("Mage-VL（旧记录，MP4 帧）", rerun["old"]),
+    ("Edge v5_mixed（见过该域）", cmp_fall["edge_detector"]),
+    ("Edge foldB（见过该域）", folds["urfd_posture_foldB"]),
+    ("Edge foldA（未见 hr_1/3）", folds["urfd_posture_foldA"]),
+):
+    fall_rows.append([label, f"{m['tp']}/{m['fn']}/{m['fp']}",
+                      f"{m['recall']*100:.1f}%", f"{m['precision']*100:.1f}%",
+                      f"{m['accuracy']*100:.1f}%"])
+table(["系统", "TP/FN/FP", "召回", "精度", "准确率"], fall_rows,
+      widths=[5.6, 3.0, 2.4, 2.4, 2.4])
+caption("表 17 跌倒判定：同一 207 帧、同一标签、同一判定（Mage 0.64 s / 9.32 GB；Edge 0.55 GB）")
+para("两边都只认“躺地”这一类，精度 100% 表示报出的 yes 全是真 lie；召回都不到 30%。"
+     "Mage 重跑 22.6% 与旧记录 28.3% 的差别来自取帧（JPG vs MP4 整数秒），不是随机性（见 8.4）。")
+
+doc.add_heading("8.3 描述任务（100 帧）", level=2)
+table(["指标", "Mage-VL", "Edge"], [
+    ["人数一致率", f"{cmp_desc['mage']['person_ok']*100:.0f}%", f"{cmp_desc['edge']['person_ok']*100:.0f}%"],
+    ["姿态正确", f"{cmp_desc['mage']['posture_correct']*100:.0f}%", f"{cmp_desc['edge']['posture_correct']*100:.0f}%"],
+    ["姿态未提", f"{cmp_desc['mage']['posture_missed']*100:.0f}%", f"{cmp_desc['edge']['posture_missed']*100:.0f}%"],
+    ["平均字数", f"{cmp_desc['mage']['avg_len']}", f"{cmp_desc['edge']['avg_len']}"],
+    ["单帧延迟", f"{cmp_desc['mage']['avg_gen_s']} s", f"{cmp_desc['edge']['avg_gen_s']} s"],
+    ["峰值显存", f"{cmp_desc['mage_peak_gb']} GB", f"0.55 GB"],
+], widths=[4.5, 5.0, 5.0])
+caption("表 18 描述任务：同一 100 帧、同一句中文描述指令（这批恰好 0 个 lie）")
+para("Mage 的 23 次人数失败主要是只描述教室、没提人；Edge 不会漏人，但没有教室/白板/投影仪这类场景语义。")
+
+doc.add_heading("8.4 确定性检验（5 个翻转帧）", level=2)
+det_rows = []
+for mode in ("deterministic", "default"):
+    answers = [r[mode][0] for r in det["rows"]]
+    stable = sum(1 for r in det["rows"] if len(set(r[mode])) == 1)
+    det_rows.append([f"5 帧（JPG，t+0.25/0.75）", f"{mode} ×{det['runs']}",
+                     ", ".join(answers), f"{stable}/5 稳定", "新重跑"])
+det_rows.append(["5 帧（MP4 整数秒）", "deterministic ×2",
+                 "yes, yes, yes, yes, no", "5/5 稳定", "旧记录"])
+table(["帧源", "模式", "5 帧答案", "稳定性", "一致于"], det_rows,
+      widths=[4.8, 4.2, 4.6, 2.6, 2.4])
+caption("表 19 确定性重跑：torch.use_deterministic_algorithms(True) + 固定种子")
+para("同一帧源下 deterministic 与 default 输出逐字一致；换取帧方式（MP4 整数秒 vs JPG）答案整体翻转。"
+     "所以 5 帧差异不是随机性，而是帧源不同。")
+
+doc.add_heading("8.5 结论与边界", level=2)
+for text in [
+    "同帧源（JPG）下：Mage 22.6% / Edge v5 26.4% / Edge foldA 18.9%，三者都远不足以单独判定“躺地”。",
+    "Edge 的“略高”依赖姿态检测器见过该域（v5_mixed/foldB）；换成未见 hr_1/hr_3 的 foldA 就低于 Mage。",
+    "成本差距明确：Mage 9.32 GB / 0.64 s（单个 yes/no），Edge 0.55 GB；描述任务 0.71 s。",
+    "描述能力方向相反：Mage 更开放（36 字、场景语义），Edge 更准但更短（16 字、只有检测到的类别）。",
+    "边界：14 行缺 250 ms 帧；foldA 只排除了 hr_1/hr_3；测试域是计算机教室；Mage 0.64 s 是 yes/no 而非长描述。",
 ]:
     bullet(text)
 
@@ -496,6 +569,9 @@ table(["文件", "作用"], [
     ["eval_tuned.py", "基座 vs 微调的三项质量指标"],
     ["bench.py / bench_2c.py", "三档延迟；两核两线程延迟"],
     ["probe_quality.py", "基座提示词探针（负面结论留证）"],
+    ["compare_mage.py / compare_mage_fall.py", "与 Mage 同帧对照（描述 / 跌倒判定）"],
+    ["rerun_mage_fall.py / rerun_mage_deterministic.py", "重跑 Mage、确定性检验"],
+    ["eval_posture_folds.py / check_mage_old_protocol.py", "foldA/foldB 消融；旧取帧协议复现"],
     ["results/*.json", "本报告全部数字的原始输出"],
 ], widths=[5.0, 11.0])
 

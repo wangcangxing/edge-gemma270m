@@ -24,7 +24,12 @@
 | `train_lora.py` | LoRA 微调（只在目标 token 上算 lm_head，显存 MB 级） |
 | `eval_tuned.py` | 基座 vs 微调：人数一致 / 物体召回 / 幻觉率 / 耗时 |
 | `bench.py` | 复现 GPU bf16 / CPU fp32 / CPU int8 三档延迟与体积 |
-| `bench_2c.py` | 绑 2 核 2 线程的端侧档位（亲和性 + torch 线程数） |
+| `bench_2c.py` | 绑 N 核 N 线程的端侧档位（亲和性 + torch 线程数 + 内存采样） |
+| `compare_mage.py` | 同帧描述任务对照（Mage vs Edge） |
+| `compare_mage_fall.py` | Mage 协议 207 帧的跌倒判定对照 |
+| `eval_posture_folds.py` | foldA/foldB/v5 权重在同批帧上的召回消融 |
+| `rerun_mage_fall.py` / `rerun_mage_deterministic.py` | 重跑 Mage；确定性检验 |
+| `check_mage_old_protocol.py` | 用 MP4 整数秒帧复现旧 probe 口径 |
 | `build_report.py` | 生成 `端侧语义描述实测报告.docx`（本地，不入库） |
 | `build_report_md.py` | 用 pandoc 把 Word 报告转成 `端侧语义描述实测报告.md`（入库副本） |
 | `端侧语义描述实测报告.md` | **实测报告正文**（GitHub 上直接读） |
@@ -179,6 +184,19 @@ PyTorch 运行时 + 量化时先载入的 fp32 副本（1.07 GB）及其分配�
 | 描述粒度 | 开放式、可长可细 | 一句话、只有检测到的类别 |
 | 单次成本 | 0.58 s（yes/no）/ 10.8 s（长描述） | ~0.9 s/句 |
 | 端侧可行性 | 需 GPU / 大内存 | CPU 可跑 |
+
+### 同帧对照（207 帧，同一批 JPG）
+
+| 系统 | 召回 | 精度 | 准确率 | 峰值显存 |
+| --- | --- | --- | --- | --- |
+| Mage-VL（重跑） | 22.6% | 100% | 80.2% | 9.32 GB |
+| **Edge v5_mixed（见过该域）** | **26.4%** | 100% | 81.2% | 0.55 GB |
+| Edge foldA（未见 hr_1/hr_3） | 18.9% | 90.9% | 78.7% | 0.55 GB |
+
+- 两者都只报“躺地”，精度 100% 表示没有误报，但召回都 <30%。
+- Edge 的“略高”依赖姿态检测器见过该域；换成未见测试视频的 foldA 后低于 Mage。
+- 5 个翻转帧来自取帧方式不同（MP4 整数秒 vs JPG）；确定性重跑 3/3 稳定，不是随机性。
+- 100 帧描述任务（另一批，0 个 lie）：Mage 人数 77%、姿态 36%、36 字；Edge 100%/93%、16 字。
 
 ## 边界（未验证的部分）
 
