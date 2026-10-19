@@ -68,6 +68,14 @@ def _dist_bucket(d: float) -> str:
     return "远处"
 
 
+def _iou(a, b) -> float:
+    x1, y1 = max(a[0], b[0]), max(a[1], b[1])
+    x2, y2 = min(a[2], b[2]), min(a[3], b[3])
+    inter = max(0.0, x2 - x1) * max(0.0, y2 - y1)
+    ua = (a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - inter
+    return inter / ua if ua > 0 else 0.0
+
+
 def _brightness(img: np.ndarray) -> str:
     y = float(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY).mean())
     if y < 60:
@@ -148,9 +156,24 @@ class SceneExtractor:
         return POSTURE_ZH.get(str(self.posture.names[best]), ""), float(r.boxes.conf[0])
 
     # -- 场景化 -------------------------------------------------------
-    def extract(self, img: np.ndarray, with_posture: bool = True) -> Scene:
+    def _postures_whole(self, img: np.ndarray) -> list[tuple[np.ndarray, str, float]]:
+        """整图跑姿态模型（与训练分布一致），再按 IoU 分配给人体框。"""
+        r = self.posture.predict(img, imgsz=640, conf=0.25, device=self.device,
+                                 verbose=False)[0]
+        out = []
+        for box, cls, cf in zip(r.boxes.xyxy.cpu().numpy(),
+                                r.boxes.cls.cpu().numpy(),
+                                r.boxes.conf.cpu().numpy()):
+            name = POSTURE_ZH.get(str(self.posture.names[int(cls)]), "")
+            out.append((box, name, float(cf)))
+        return out
+
+    def extract(self, img: np.ndarray, with_posture: bool = True,
+                posture_whole: bool = False,
+                posture_min_conf: float = 0.55) -> Scene:
         h, w = img.shape[:2]
         r = self._predict(img)
+        whole = self._postures_whole(img) if (with_posture and posture_whole) else []
         persons: list[dict[str, Any]] = []
         objs: list[tuple[str, np.ndarray, float]] = []
 
@@ -168,8 +191,12 @@ class SceneExtractor:
                     "脚部接近地面": bool(y2 >= GROUND_RATIO * h),
                 }
                 if with_posture:
-                    pz, conf = self._posture_of(img, box)
-                    if pz and conf >= 0.55:
+                    if whole:
+                        best = max(whole, key=lambda g: _iou(g[0], box))
+                        pz, conf = (best[1], best[2]) if _iou(best[0], box) >= 0.3 else ("", 0.0)
+                    else:
+                        pz, conf = self._posture_of(img, box)
+                    if pz and conf >= posture_min_conf:
                         p["姿态"] = pz
                 p["_box"] = (x1, y1, x2, y2)
                 persons.append(p)
