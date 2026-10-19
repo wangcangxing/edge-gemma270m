@@ -1,0 +1,26 @@
+[
+  {
+    "video": "hr_fall_detection_2.mp4",
+    "t": 165,
+    "image": "hr_fall_detection_2_t0165_250.jpg",
+    "gt_lie_boxes": 1,
+    "persons": 3,
+    "person_iou_001": 0.987,
+    "person_conf_001": 0.711,
+    "posture_iou": 0.952,
+    "posture": "躺卧",
+    "posture_conf": 0.892
+  },
+  {
+    "video": "fall_detection_10.mp4",
+    "t": 66,
+    "image": "fall_detection_10_t0066_250.jpg",
+    "gt_lie_boxes": 1,
+    "persons": 5,
+    "person_iou_001": 0.996,
+    "person_conf_001": 0.571,
+    "posture_iou": 0.974,
+    "posture": "躺卧",
+    "posture_conf": 0.942
+  }
+]
