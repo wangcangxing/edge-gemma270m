@@ -1,0 +1,14 @@
+{
+  "n": 20,
+  "model": "yolov10n.onnx",
+  "threads": 2,
+  "cpus": [
+    12,
+    13
+  ],
+  "median_ms": 94.5,
+  "mean_ms": 100.1,
+  "std_ms": 10.9,
+  "p95_ms": 116.8,
+  "rss_mb": 231.8
+}

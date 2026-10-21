@@ -1,0 +1,357 @@
+{
+  "n": 20,
+  "model": "gemma-270m-q4_k_m.gguf",
+  "threads": 2,
+  "server_rss_mb": null,
+  "latency_s": {
+    "median": 0.605,
+    "mean": 0.602,
+    "std": 0.075,
+    "p95": 0.714
+  },
+  "person_ok": 1.0,
+  "recall": 1.0,
+  "halluc_rate": 0.0,
+  "rows": [
+    {
+      "image": "hr_fall_detection_3_t0074_750.jpg",
+      "n": 1,
+      "desc": "画面右下方有一人站立，旁边是椅子。",
+      "latency_s": 0.63,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 13,
+        "prompt_tokens": 133,
+        "total_tokens": 146,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0071_250.jpg",
+      "n": 1,
+      "desc": "画面下方有一人站立，旁边是椅子。",
+      "latency_s": 0.612,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 12,
+        "prompt_tokens": 133,
+        "total_tokens": 145,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0077_250.jpg",
+      "n": 1,
+      "desc": "画面右下方有一人站立，旁边是椅子。",
+      "latency_s": 0.615,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 13,
+        "prompt_tokens": 133,
+        "total_tokens": 146,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0220_250.jpg",
+      "n": 0,
+      "desc": "画面中没有看到人，只有椅子。",
+      "latency_s": 0.464,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 10,
+        "prompt_tokens": 99,
+        "total_tokens": 109,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0055_750.jpg",
+      "n": 1,
+      "desc": "画面下方有一人站立，旁边是椅子。",
+      "latency_s": 0.537,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 12,
+        "prompt_tokens": 133,
+        "total_tokens": 145,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0128_250.jpg",
+      "n": 1,
+      "desc": "画面下方有一人坐，旁边是椅子。",
+      "latency_s": 0.542,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 11,
+        "prompt_tokens": 132,
+        "total_tokens": 143,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0245_750.jpg",
+      "n": 1,
+      "desc": "画面右下方有一人站立，旁边是手提包和椅子。",
+      "latency_s": 0.709,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 17,
+        "prompt_tokens": 144,
+        "total_tokens": 161,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0222_250.jpg",
+      "n": 1,
+      "desc": "画面下方有一人站立，旁边是椅子。",
+      "latency_s": 0.595,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 12,
+        "prompt_tokens": 133,
+        "total_tokens": 145,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0049_750.jpg",
+      "n": 0,
+      "desc": "画面中没有看到人，只有椅子和笔记本电脑。",
+      "latency_s": 0.517,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 13,
+        "prompt_tokens": 102,
+        "total_tokens": 115,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0235_750.jpg",
+      "n": 1,
+      "desc": "画面下方有一人站立，旁边是椅子。",
+      "latency_s": 0.565,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 12,
+        "prompt_tokens": 133,
+        "total_tokens": 145,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0101_750.jpg",
+      "n": 1,
+      "desc": "画面下方有一人站立，旁边是椅子。",
+      "latency_s": 0.587,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 12,
+        "prompt_tokens": 133,
+        "total_tokens": 145,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0196_250.jpg",
+      "n": 1,
+      "desc": "画面右下方有一人站立，旁边是椅子。",
+      "latency_s": 0.615,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 13,
+        "prompt_tokens": 133,
+        "total_tokens": 146,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0060_750.jpg",
+      "n": 1,
+      "desc": "画面右下方有一人站立，旁边是椅子。",
+      "latency_s": 0.617,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 13,
+        "prompt_tokens": 133,
+        "total_tokens": 146,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0317_250.jpg",
+      "n": 1,
+      "desc": "画面中央有一人站立，旁边是椅子。",
+      "latency_s": 0.622,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 12,
+        "prompt_tokens": 133,
+        "total_tokens": 145,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0063_750.jpg",
+      "n": 1,
+      "desc": "画面下方有一人站立，旁边是椅子。",
+      "latency_s": 0.714,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 12,
+        "prompt_tokens": 133,
+        "total_tokens": 145,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0165_250.jpg",
+      "n": 1,
+      "desc": "画面下方有一人坐，旁边是椅子。",
+      "latency_s": 0.555,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 11,
+        "prompt_tokens": 132,
+        "total_tokens": 143,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0357_750.jpg",
+      "n": 1,
+      "desc": "画面下方有一人坐，旁边是椅子。",
+      "latency_s": 0.599,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 11,
+        "prompt_tokens": 131,
+        "total_tokens": 142,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0137_750.jpg",
+      "n": 1,
+      "desc": "画面下方有一人站立，旁边是椅子。",
+      "latency_s": 0.611,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 12,
+        "prompt_tokens": 133,
+        "total_tokens": 145,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0141_750.jpg",
+      "n": 1,
+      "desc": "画面下方有一人站立，旁边是椅子。",
+      "latency_s": 0.532,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 12,
+        "prompt_tokens": 133,
+        "total_tokens": 145,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    },
+    {
+      "image": "hr_fall_detection_3_t0289_750.jpg",
+      "n": 1,
+      "desc": "画面下方有一人站立，旁边是狗和椅子。",
+      "latency_s": 0.795,
+      "person_ok": true,
+      "recall": 1.0,
+      "hallucinated": [],
+      "usage": {
+        "completion_tokens": 14,
+        "prompt_tokens": 140,
+        "total_tokens": 154,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "gguf_q4": {
+    "e2": {
+      "median_s": 0.957,
+      "p95_s": 1.228,
+      "person_ok": 1.0,
+      "recall": 1.0,
+      "halluc": 0.0
+    },
+    "p2": {
+      "median_s": 0.605,
+      "p95_s": 0.714,
+      "person_ok": 1.0,
+      "recall": 1.0,
+      "halluc": 0.0
+    }
+  },
+  "yolo_onnx": {
+    "e2": {
+      "median_ms": 94.5,
+      "p95_ms": 116.8
+    },
+    "p2": {
+      "median_ms": 62.1,
+      "p95_ms": 79.4
+    }
+  },
+  "rss_mb": {
+    "llama_server": 416,
+    "onnx_runtime": 232
+  },
+  "combined_est_s": {
+    "e2": 1.051,
+    "p2": 0.667
+  }
+}
