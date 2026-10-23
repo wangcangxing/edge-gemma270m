@@ -39,6 +39,10 @@ lie19 = json.loads((RESULTS / "edge_lie19_diag.json").read_text(encoding="utf-8"
 multi = json.loads((RESULTS / "edge_multi_person.json").read_text(encoding="utf-8"))
 yolo_metrics = json.loads((RESULTS / "edge_yolo_test_metrics.json").read_text(encoding="utf-8"))
 two_tp = json.loads((RESULTS / "edge_two_tp_check.json").read_text(encoding="utf-8"))
+e2ghz = json.loads((RESULTS / "edge_posture_e_2ghz.json").read_text(encoding="utf-8"))
+e2ghz_1e = json.loads((RESULTS / "edge_posture_e_2ghz_1e_recheck.json").read_text(encoding="utf-8"))
+stock_1c2t = json.loads((RESULTS / "edge_thread_sweep_posture_e_1c2t.json").read_text(encoding="utf-8"))
+stock_e = json.loads((RESULTS / "edge_thread_sweep_posture_e.json").read_text(encoding="utf-8"))
 rows_int8, rows_bf16 = q_int8["tuned_rows"], q_bf16["tuned_rows"]
 q8s, q16s = q_int8["summary"]["tuned"], q_bf16["summary"]["tuned"]
 exact_8_16 = sum(a["desc"] == b["desc"] for a, b in zip(rows_int8, rows_bf16))
@@ -219,6 +223,10 @@ bullet("多人帧：2 人计数 100%（26/26），但物体召回 0%（多人目
 bullet("YOLOv10n 在 test：人数准确 95.0%/91.2%，人体框召回 93.0%/90.9%，姿态 lie 0/19；"
        "19 个 lie 帧全部是“人体框未检出”。")
 bullet("yes/no 任务：Edge 1 token 34 ms vs Mage 640 ms，延迟可比；但 Gemma 不守规则（precision 58.8%），精度不可比。")
+bullet("E 核锁 2.0 GHz：8e 1.317 s，比 stock 3.3–3.8 GHz 的 823 ms 慢 1.6 倍；"
+       "1e 的 scene 1.68 s 是单线程串行瓶颈，不作算力参考。")
+bullet("L3 24 MB 装不下 235 MB 的 Q4，且权重每 token 只用一次、无复用；Gemma 解码不以 L3 为瓶颈，"
+       "YOLO 9 MB 可部分受益，1e 异常与缓存无关。")
 bullet("描述上限 = 检测器上限 + 监督目标上限：检测器只给 COCO 80 类 + 3 类姿态，没有颜色/材质/动作；"
        "训练目标又只覆盖“人数/位置/姿态/旁边物体”，多人模板不含物体；"
        "测试集仍是同一家庭按视频留出，未验证跨场景泛化。")
@@ -491,7 +499,7 @@ table(["组", "来源", "n", "人数一致", "物体召回", "幻觉率"], [
      f"{g['all_3p']['person_ok']*100:.0f}%", f"{g['all_3p']['obj_recall']*100:.0f}%",
      f"{g['all_3p']['halluc_rate']*100:.0f}%"],
 ], widths=[3.6, 4.6, 1.4, 2.6, 2.6, 2.2])
-caption("表 22 多人帧：test 只有 6 个 2 人帧、0 个 3 人帧（无法按要求抽 20 个）")
+caption("表 18 多人帧：test 只有 6 个 2 人帧、0 个 3 人帧（无法按要求抽 20 个）")
 para("2 人计数 26/26 全对，但描述完全不提物体——多人目标模板只写人数与前两人姿态，"
      "物体召回 0% 是训练目标设计导致，不是检测器没检到。3 人两帧都输出“画面中有2人”，"
      "全库只有 2 个 3 人训练样本，不足以覆盖。")
@@ -511,7 +519,7 @@ table(["指标", "test 100 帧", "test 592 帧"], [
      f"{sall['posture']['坐']['recall']*100:.1f}%"],
     ["姿态：躺卧", "无样本", f"{sall['posture']['躺卧']['recall']*100:.1f}%（0/19）"],
 ], widths=[5.2, 5.0, 5.0])
-caption("表 23 YOLOv10n + 姿态在 test 划分上的检测指标")
+caption("表 19 YOLOv10n + 姿态在 test 划分上的检测指标")
 para("三个口径限制：① 标注每帧只标主体一人，所以“人数准确率”实际是“是否恰好检出 1 人”，"
      "592 帧里 6 帧检出 2 人被计错、但第二人可能真实存在；② COCO 物体没有真值，"
      "100% 只是重跑与建库物体名一致，不是召回（表 14 的“物体召回”是描述里提到场景物体名，口径不同）；"
@@ -528,7 +536,7 @@ table(["诊断", "帧数"], [
     ["检出框、姿态判错", n_wrong],
     ["检出框、姿态未判", n_miss],
 ], widths=[10.5, 3.0])
-caption("表 24 19 个 lie 帧的失败环节：全部卡在人体检测")
+caption("表 20 19 个 lie 帧的失败环节：全部卡在人体检测")
 low = {}
 for r in diag:
     low[r["posture_low"] or "无信号"] = low.get(r["posture_low"] or "无信号", 0) + 1
@@ -560,6 +568,10 @@ for i, text in enumerate([
     "YOLO test：人数 95.0%/91.2%，人体框 93.0%/90.9%，姿态 lie 0/19；19/19 是人体框未检出，"
     "瓶颈在检测器而非姿态分类。",
     "yes/no：Edge 34 ms vs Mage 640 ms，延迟可比；但 270M 的 yes/no precision 58.8%，精度不可比。",
+    "E 核锁 2.0 GHz：8e 1.317 s，比 stock 3.3–3.8 GHz 的 823 ms 慢 1.6 倍；"
+    "1e 的 scene 1.68 s 是单线程串行瓶颈，不作算力参考。",
+    "L3 24 MB 装不下 235 MB 的 Q4，权重每 token 只用一次；Gemma 解码不以 L3 为瓶颈，"
+    "YOLO 的 9 MB 可部分受益，1e 异常与缓存无关。",
 ], 1):
     para(f"{i}. {text}")
 
@@ -605,7 +617,7 @@ for label, m in (
                       f"{m['accuracy']*100:.1f}%"])
 table(["系统", "TP/FN/FP", "召回", "精度", "准确率"], fall_rows,
       widths=[5.6, 3.0, 2.4, 2.4, 2.4])
-caption("表 18 跌倒判定：同一 207 帧、同一标签、同一判定（Mage 0.64 s / 9.32 GB；Edge 0.55 GB）")
+caption("表 21 跌倒判定：同一 207 帧、同一标签、同一判定（Mage 0.64 s / 9.32 GB；Edge 0.55 GB）")
 para("两边都只认“躺地”这一类，精度 100% 表示报出的 yes 全是真 lie；召回都不到 30%。"
      "Mage 重跑 22.6% 与旧记录 28.3% 的差别来自取帧（JPG vs MP4 整数秒），不是随机性（见 8.4）。")
 para("统计检验（同 207 帧配对 McNemar 精确检验，Mage vs Edge v5）：b=6（仅 Mage 对）、c=8（仅 Edge 对），"
@@ -623,7 +635,7 @@ table(["指标", "Mage-VL", "Edge"], [
     ["单帧延迟", f"{cmp_desc['mage']['avg_gen_s']} s", f"{cmp_desc['edge']['avg_gen_s']} s"],
     ["峰值显存", f"{cmp_desc['mage_peak_gb']} GB", f"0.55 GB"],
 ], widths=[4.5, 5.0, 5.0])
-caption("表 19 描述任务：同一 100 帧、同一句中文描述指令（这批恰好 0 个 lie）")
+caption("表 22 描述任务：同一 100 帧、同一句中文描述指令（这批恰好 0 个 lie）")
 para("姿态口径：真值取数据集标注（站立/坐/躺卧）；描述含对应词（站立/站、坐、躺/卧）记“正确”，"
      "含其他姿态词但非真值记“错误”，不含任何姿态词记“未提”。"
      "7 帧无姿态标注（含 5 个无人帧）不计入三者，百分比以全部 100 帧为分母。")
@@ -640,7 +652,7 @@ det_rows.append(["5 帧（MP4 整数秒）", "deterministic ×2",
                  "yes, yes, yes, yes, no", "5/5 稳定", "旧记录"])
 table(["帧源", "模式", "5 帧答案", "稳定性", "一致于"], det_rows,
       widths=[4.8, 4.2, 4.6, 2.6, 2.4])
-caption("表 20 确定性重跑：torch.use_deterministic_algorithms(True) + 固定种子")
+caption("表 23 确定性重跑：torch.use_deterministic_algorithms(True) + 固定种子")
 para("同一帧源下 deterministic 与 default 输出逐字一致；换取帧方式（MP4 整数秒 vs JPG）答案整体翻转。"
      "所以 5 帧差异不是随机性，而是帧源不同。")
 
@@ -676,7 +688,7 @@ table(["子集", "lie 帧", "姿态规则命中", "召回", "命中帧"], [
     ["两者交集", len(overlap), 0, "0%",
      "、".join(f'hr_3 t{r["t"]}' for r in overlap)],
 ], widths=[4.6, 1.8, 2.8, 1.8, 5.0])
-caption("表 21 姿态规则命中的子集拆解：20% 与 0/19 不是同一批帧")
+caption("表 24 姿态规则命中的子集拆解：20% 与 0/19 不是同一批帧")
 para("20 帧 yes/no 子集的 10 个 lie 来自 hr_2（3）、hr_3（4）、fall_detection_10（3）；"
      "2 个命中分别来自 hr_2 t165 与 fall_detection_10 t66，都不在 19 帧里。"
      "这两帧都是清晰样本：人体框 IoU 0.987 / 0.996，躺卧置信度 0.892 / 0.942；"
@@ -727,6 +739,43 @@ table(["实验", "样本", "关键结果", "结论"], [
      "20% 与 0/19 是不同子集"],
 ], widths=[3.2, 4.6, 5.4, 4.2])
 caption("表 27 新增实验一览：所有结论均带样本与子集口径")
+
+# ---------------- 10 E 核与缓存 ----------------
+doc.add_heading("10 E 核锁频与 L3 缓存", level=1)
+doc.add_heading("10.1 E 核锁 2.0 GHz", level=2)
+e2_rows = [
+    ["1e", f"{stock_1c2t['configs']['1e']['total_ms']['median']}",
+     f"{e2ghz_1e['configs']['1e']['total_ms']['median']}", "3.2×"],
+    ["1e2t（同核 2 线程）", f"{stock_1c2t['configs']['1e2t']['total_ms']['median']}",
+     f"{e2ghz_1e['configs']['1e2t']['total_ms']['median']}", "1.8×"],
+    ["2e", f"{stock_1c2t['configs']['2e']['total_ms']['median']}",
+     f"{e2ghz['configs']['2e']['total_ms']['median']}", "2.1×"],
+    ["4e", f"{stock_e['configs']['4e']['total_ms']['median']}",
+     f"{e2ghz['configs']['4e']['total_ms']['median']}", "1.8×"],
+    ["8e", f"{stock_e['configs']['8e']['total_ms']['median']}",
+     f"{e2ghz['configs']['8e']['total_ms']['median']}", "1.6×"],
+]
+table(["配置", "stock（BIOS 改前 3.3–3.8 GHz）", "E-Core Ratio=20（2.0 GHz）", "倍数"], e2_rows,
+      widths=[3.8, 5.0, 5.2, 1.8])
+caption("表 28 E 核锁 2.0 GHz 与 stock 的端到端对照（20 帧，姿态开启）")
+para("E-Core Ratio=20 由 BIOS 锁定，2.0 GHz 是硬上限；powercfg 的 100/75/60/50 四档没有形成有效的频率扫描，"
+     "那批数值（2e 约 3.35–3.63 s）与本次干净测量不一致，按无效数据处理，不单独引用。"
+     "1e 的 scene 高达 1.68 s（同核 2 线程只有 0.43 s），表现为单线程串行/同步瓶颈，"
+     "不能当成 2.0 GHz 的纯算力；2e/4e/8e 更可信。8e 从 823 ms 升到 1317 ms，约 1.6 倍，与频率差一致。")
+
+doc.add_heading("10.2 L3 缓存与各负载的关系", level=2)
+table(["负载", "工作集", "与 24 MB L3 的关系", "主要瓶颈"], [
+    ["Gemma Q4 解码", "Q4 235 MB；F16 536 MB；int8 参数约 0.63 GB",
+     "远超 L3；每个权重每 token 只用一次，无复用", "核心频率 + 内存延迟"],
+    ["YOLOv10n ONNX", "9 MB", "可部分驻留 L3", "L3/ring 频率、P 核主频"],
+    ["1e 的 scene", "图像 + 中间张量", "与 L3 容量无关", "单线程串行 + GPU 同步"],
+], widths=[3.4, 5.4, 5.6, 3.6])
+caption("表 29 L3 缓存与各负载的关系：Gemma 解码不以 L3 为瓶颈")
+para("本机 i5-14600KF：L3 24 MB（P/E 共享），L2 合计 20 MB（P 每核 2 MB，E 每簇 4 MB）。"
+     "Gemma 的权重每 token 全量流式读取且不复用，24 MB L3 装不下 235 MB 的 Q4，"
+     "所以 2.0 GHz 的 8e 从 823 ms 升到 1317 ms 主要由核心频率解释，不是 L3 容量；"
+     "YOLO 的 9 MB 模型能部分驻留 L3，P 核高主频/L3 延迟对它更有意义；"
+     "1e 的异常是串行流水线，与缓存无关。")
 
 # ---------------- 附录 ----------------
 doc.add_heading("附录 A 复现命令", level=1)
